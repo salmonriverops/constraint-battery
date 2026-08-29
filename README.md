@@ -8,12 +8,21 @@ Probes emit candidates. Only a human creates a constraint.
 ## Run it
 
     pip install duckdb
-    python3 cli.py load <export_dir>          # validate against the denylist, load into duckdb
+    export AIRTABLE_TOKEN=pat...              # a token with data.records:read on the base
+    python3 tools/export_airtable.py --base appXXXXXXXXXXXXXX --out data/export
+    python3 cli.py load data/export           # validate against the denylist, load into duckdb
     python3 cli.py run  --out runs/$(date +%F) # run all probes, write candidates.json
     python3 cli.py score runs/$(date +%F)      # after match.csv is filled in, write score.md
 
 No server. DuckDB over flat exports, so it runs on a laptop in somebody else's
 office. Postgres is for the eventual client install, which is a different tool.
+
+`tools/export_airtable.py` pulls the export. Airtable's built in CSV export is not
+usable: it omits record ids and renders linked records as display names, so resources
+would load with no id and the join from assignments to resources would collapse. The
+exporter goes through the REST API instead. What it fetches is derived from
+`extract/airtable_map.json`, so it cannot drift from the adapter, and it requests only
+the columns the map names. `--dry-run` prints the plan without fetching.
 
 `tools/make_fixture.py` writes a synthetic export with known structure planted in it,
 for exercising the battery without real data.
