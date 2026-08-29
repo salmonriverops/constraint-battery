@@ -1,0 +1,65 @@
+{
+  "_comment": [
+    "Declarative source-to-landing map for the Airtable export.",
+    "Edit this file, not the adapter, when the export's column names change.",
+    "Every name here is a source column. Missing columns are reported by the loader,",
+    "they are never silently treated as null."
+  ],
+
+  "work": [
+    {
+      "table": "Daily Ops",
+      "id_prefix": "op_",
+      "work_type": "Trip type",
+      "start_ts": "Trip start",
+      "end_ts": "Trip end",
+      "location_id": null,
+      "status": "Status",
+      "customer_count": "Guest count",
+      "fallback_date": "Date"
+    },
+    {
+      "table": "Movements",
+      "id_prefix": "mv_",
+      "work_type_link": "Movement Type",
+      "start_ts": "Start",
+      "end_ts": "End",
+      "location_link": "Origin",
+      "status": "Status",
+      "customer_count": "Passengers",
+      "fallback_date": "Date"
+    }
+  ],
+
+  "resources": [
+    {"table": "Guides & Staff", "id_prefix": "gs_", "kind": "person",
+     "name": "Name", "home_location_id": "Location base"},
+    {"table": "Vehicles", "id_prefix": "vh_", "kind_column": "Type",
+     "name": "Unit name", "home_location_id": "Location base"},
+    {"table": "Boats", "id_prefix": "bt_", "kind": "boat",
+     "name": "Boat number", "home_location_id": "Location"}
+  ],
+
+  "assignments": [
+    {"table": "Daily Ops", "work_prefix": "op_",
+     "roles": {"Guide Availability": "gs_", "Vehicle": "vh_", "Trailer": "vh_"}},
+    {"table": "Movements", "work_prefix": "mv_",
+     "roles": {"Driver (link)": "gs_", "Vehicle": "vh_", "Trailer": "vh_"}},
+    {"table": "Rig Assignments", "work_link": {"Daily Op": "op_", "Movement": "mv_"},
+     "roles": {"Driver": "gs_", "Vehicle": "vh_", "Trailer": "vh_"}}
+  ],
+
+  "locations": [{"table": "Locations", "id_prefix": "lc_", "name": "Name"}],
+
+  "location_travel": [
+    {"table": "Routes", "from_link": "From", "to_link": "To", "id_prefix": "lc_",
+     "minutes": "Drive minutes", "sample_count": "Sample count"}
+  ],
+
+  "changes": [
+    {"table": "Daily Ops", "entity_prefix": "op_", "ack_column": "Acknowledged conflicts",
+     "work_date": "Date"},
+    {"table": "Movements", "entity_prefix": "mv_", "ack_column": "Acknowledged conflicts",
+     "work_date": "Date"}
+  ]
+}

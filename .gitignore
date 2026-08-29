@@ -1,0 +1,11 @@
+# Business data never enters git. Code in git, data on disk.
+data/
+runs/*/export/
+*.duckdb
+*.duckdb.wal
+
+# Override label maps are answer-key material. See extract/README.md.
+*.labelmap.json
+
+__pycache__/
+*.pyc
