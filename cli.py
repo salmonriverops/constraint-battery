@@ -94,6 +94,7 @@ def cmd_run(args):
         "min_instances_per_work_type": args.min_instances,
         "min_populated_rows_per_field": args.min_populated,
         "min_observations": args.min_observations,
+        "min_change_events": args.min_change_events,
     }
 
     con = duckdb.connect(str(args.db), read_only=True)
@@ -175,6 +176,8 @@ def main(argv=None):
                        help="a field needs at least this many populated rows")
     p_run.add_argument("--min-observations", type=int, default=50,
                        help="a distribution needs at least this many observations")
+    p_run.add_argument("--min-change-events", type=int, default=3,
+                       help="an overridden field needs at least this many events")
     p_run.set_defaults(func=cmd_run)
 
     p_score = sub.add_parser("score", help="write score.md from a filled in match.csv")
