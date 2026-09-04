@@ -47,3 +47,29 @@ Lesson worth keeping. The loader should probably refuse, not warn, when a
 mapped column is absent from every record. A warning that appears next to nine
 other warnings is not a signal. Left as a v2 change so it does not alter
 behaviour mid protocol.
+
+## work_type on a Movement is a record id, not a name
+
+Found 2026-09-04 while reading `peak work_per_day` output. Not fixed, and
+deliberately not re-run. See the reasoning below.
+
+`Movement Type` is a linked record field. `base.links()` normalises a link cell
+to a list of record ids, and `work()` takes `ids[0]`, so a Movement's work_type
+lands as `recIoNaMNYNiH9vBf` rather than the type's name. Daily Ops trip types
+come through a single select, which carries a name, which is why one table
+reads properly and the other does not.
+
+Why this is not being fixed mid protocol. The value is used only to partition:
+two movements of the same type share the same id exactly as they would share
+the same name, so every group, count and candidate is identical either way.
+The defect is that the output is unreadable, not that it is wrong. Re-running
+for a cosmetic fix would set the precedent that a run is repeated until it
+reads better, and one re-run has already happened today for a defect that did
+change what was detected. The bar for a second has to be higher than this.
+
+Separately, and not a defect: most Movements have no `Movement Type` at all, so
+they land as untyped. That is the data, not the loader.
+
+Fix for v2. Carry the linked record's display name where Airtable supplies one
+and fall back to the id, for work_type and for any other label read from a
+link.
