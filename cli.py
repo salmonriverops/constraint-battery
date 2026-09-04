@@ -642,6 +642,45 @@ def cmd_day(args):
     return 0
 
 
+def cmd_overrides(args):
+    """Every override label in the log, with how much sits behind each.
+
+    One override in isolation says little. The vocabulary says a lot: which keys
+    name a specific piece of equipment, which name a rule, which cluster into
+    families, and where the weight is. Labels come from the gitignored sidecar
+    and never entered any probe.
+    """
+    import duckdb
+
+    overrides, map_path = _label_map(args.labels, args.db)
+    con = duckdb.connect(str(args.db), read_only=True)
+    try:
+        rows = con.execute("""
+            SELECT field, count(*) AS events, count(DISTINCT entity_id) AS entities,
+                   min(changed_at), max(changed_at), count(DISTINCT changed_by)
+            FROM changes GROUP BY 1 ORDER BY events DESC, field""").fetchall()
+    finally:
+        con.close()
+
+    if map_path:
+        print(f"labels from {map_path}")
+    print(f"{len(rows)} distinct override label(s)\n")
+    print(f"  {'events':>7}{'jobs':>7}{'actors':>8}   {'first seen':<12} label")
+    shown = rows if args.all else rows[:args.top]
+    for field, events, entities, first, last, actors in shown:
+        label = overrides.get(field, field)
+        when = first.strftime("%Y-%m-%d") if first else "?"
+        print(f"  {events:>7}{entities:>7}{actors:>8}   {when:<12} {label}")
+    if len(shown) < len(rows):
+        print(f"\n  ... and {len(rows) - len(shown)} more. Use --all to see them, "
+              f"or --top N.")
+    tail = sum(e for _, e, _, _, _, _ in rows[args.top:]) if not args.all else 0
+    if tail:
+        print(f"  those {len(rows) - args.top} account for {tail} of "
+              f"{sum(e for _, e, _, _, _, _ in rows)} events.")
+    return 0
+
+
 def cmd_override(args):
     """Every change recorded under one override, with the jobs it touched.
 
@@ -778,6 +817,13 @@ def main(argv=None):
     p_judge.add_argument("--redo", action="store_true",
                          help="go through candidates that already have a verdict")
     p_judge.set_defaults(func=cmd_judge)
+
+    p_ovrs = sub.add_parser("overrides", help="list every override label with its weight")
+    p_ovrs.add_argument("--db", default=str(DEFAULT_DB))
+    p_ovrs.add_argument("--labels", help="path to the labelmap.json the loader wrote")
+    p_ovrs.add_argument("--top", type=int, default=40)
+    p_ovrs.add_argument("--all", action="store_true")
+    p_ovrs.set_defaults(func=cmd_overrides)
 
     p_ovr = sub.add_parser("override", help="open one p08 override: its label and its jobs")
     p_ovr.add_argument("field", help="ovr_xxxxxxxxxxxx, or just the hex part")
