@@ -72,10 +72,25 @@ def score_run(run_dir: Path, key_dir: Path):
         if key_id and key_id not in key_by_id:
             problems.append(f"{cid}: key_id {key_id!r} is not in the answer key")
             continue
-        verdicts[verdict] += 1
-        per_candidate[cid] = (verdict, key_id, (row.get("note") or "").strip())
+        # One candidate may recover more than one key row. Write one match.csv row
+        # per pairing, repeating the candidate_id. Recall credits every key row
+        # named. Precision counts the candidate once, never once per pairing.
+        entry = per_candidate.setdefault(
+            cid, {"verdict": verdict, "key_ids": [], "notes": []})
+        if entry["verdict"] != verdict:
+            problems.append(
+                f"{cid}: rows disagree on the verdict, {entry['verdict']} then {verdict}")
+            continue
+        if key_id and key_id not in entry["key_ids"]:
+            entry["key_ids"].append(key_id)
+        note = (row.get("note") or "").strip()
+        if note and note not in entry["notes"]:
+            entry["notes"].append(note)
         if verdict == "MATCH":
             matched_keys[key_id].append(cid)
+
+    verdicts = Counter(entry["verdict"] for entry in per_candidate.values())
+    multi = sorted(cid for cid, entry in per_candidate.items() if len(entry["key_ids"]) > 1)
 
     total_candidates = len(candidates)
     scored = len(per_candidate)
@@ -94,8 +109,8 @@ def score_run(run_dir: Path, key_dir: Path):
             by_type[ktype][0] += 1
 
     unrecovered = [row for row in key_rows if row["key_id"] not in matched_keys]
-    novel = [(cid, per_candidate[cid][2]) for cid in sorted(per_candidate)
-             if per_candidate[cid][0] == "NEW"]
+    novel = [(cid, "; ".join(per_candidate[cid]["notes"])) for cid in sorted(per_candidate)
+             if per_candidate[cid]["verdict"] == "NEW"]
 
     lines = []
     add = lines.append
@@ -125,6 +140,13 @@ def score_run(run_dir: Path, key_dir: Path):
     add(f"| Novelty | {verdicts['NEW']} | real constraints the key did not contain |")
     add(f"| False | {verdicts['FALSE']} | candidates that were not constraints |")
     add("")
+    if multi:
+        add(f"{len(multi)} candidate(s) recovered more than one key row. Each is counted "
+            f"once in precision and credits every key row it named:")
+        add("")
+        for cid in multi:
+            add(f"- {cid} covers {', '.join(per_candidate[cid]['key_ids'])}")
+        add("")
     if verdicts["NEW"]:
         add(f"Novelty is the number that matters. {verdicts['NEW']} constraint(s) here are "
             f"real and a two-year manual effort did not write them down.")

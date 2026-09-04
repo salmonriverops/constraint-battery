@@ -46,6 +46,22 @@ Verdicts, one per candidate:
 Leave a candidate blank only if you have not got to it yet. `score.md` counts blanks
 against precision, because an unfinished match is not a good result.
 
+**One candidate can recover several key rows.** A probe states a rule once, in general
+terms, where your inventory may hold one row per case. When a single candidate covers
+more than one key row, write one `match.csv` row per pairing, repeating the
+`candidate_id`:
+
+    p04-ceiling-customers-per-work,K001,MATCH,covers both trip lengths
+    p04-ceiling-customers-per-work,K002,MATCH,
+
+Every key row named is credited to recall. The candidate is counted once in precision,
+not once per pairing. `score.md` lists which candidates did this, so the effect on the
+numbers is visible rather than buried.
+
+This is what lets you write the key at whatever granularity your inventory actually
+uses. Do not flatten real rules together to make the key line up with the probes: that
+is tuning the key to the test.
+
 ## What the numbers mean
 
 - **Recall.** Key rows with at least one MATCH, over total key rows.
