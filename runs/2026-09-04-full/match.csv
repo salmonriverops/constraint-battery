@@ -1,0 +1,30 @@
+candidate_id,key_id,verdict,note
+p03-exclusivity-bus,,,
+p03-exclusivity-person,,NEW,"> Guides assigned to a trip also run that trip's shuttles.   <- talk, Enter > Only at defined drop and pickup points, at set times.      <- talk, Enter > Not a double booking and does not need extra staff."
+p03-exclusivity-trailer,,NEW,trailers can serve multiple trips on the same day timing depends more on the hours and locations. a rig (trailer) can drop off full day at spring bar then make it down to lucile to pickup the morning half day. then can pickup the full day and the afternoon half day later that day at lucile
+p03-exclusivity-van,,NEW,"vans on monday or thursday can drop off the full day at spring bar then continue up river to help deliver SRHAB to the put in launch. they can return and help with the pickup of afternoon half day trips. but can't help with monring or mid day pickups. they usually are not back in time to help pickup the full day trips which end around 3pm also small trips such as SRHAB, half and full days from riggins to lucile can be picked up with the same vehicle as long as there in enough seats."
+p04-ceiling-customers-per-work,K012,MATCH,"| p04-ceiling-customers-per-work | Stated cap of 120 looks conservative. Records show 127 already ran. True ceiling probably nearer 140. | needs checking against seats, PFDs and guide count before adopting | not yet written into the SOPs |"
+p04-ceiling-resources-per-work,,FALSE,
+p04-ceiling-work-per-day,,,
+p04-ceiling-work-per-location-per-day,,,
+p04-ceiling-work-per-resource-per-day,,,
+p05-population-work-type-by-status,,,
+p05-exemption-work-type-by-status-planned,,,
+p08-override-work-ovr-0a9e36c5ef2f,,,
+p08-override-work-ovr-0cd7af36191f,,,
+p08-override-work-ovr-1b495b2aa25b,,,
+p08-override-work-ovr-208d44cad2d2,,,
+p08-override-work-ovr-264e4cce27ff,,,
+p08-override-work-ovr-384927112582,,,
+p08-override-work-ovr-4d682831618d,,,
+p08-override-work-ovr-6bd33d092af5,,,
+p08-override-work-ovr-6c27f1502e50,,,
+p08-override-work-ovr-6f14edf07cf2,,,
+p08-override-work-ovr-7b8042acacfd,,,
+p08-override-work-ovr-9e3bdb99b27b,,,
+p08-override-work-ovr-b41bb92b8955,,,
+p08-override-work-ovr-bf5efa29e136,,,
+p08-override-work-ovr-e4b5f5e2c2d1,,,
+p08-override-work-ovr-e87673c6f82a,,,
+p08-override-work-ovr-f3ebe5d06d50,,,
+p08-override-work-ovr-fc4e6af39b2a,,,

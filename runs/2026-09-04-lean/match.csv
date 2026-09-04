@@ -1,0 +1,7 @@
+candidate_id,key_id,verdict,note
+p03-exclusivity-vehicle,,,
+p03-turnaround-vehicle,,,
+p04-ceiling-customers-per-work,,,
+p04-ceiling-resources-per-work,,,
+p04-ceiling-work-per-day,,,
+p04-ceiling-work-per-resource-per-day,,,

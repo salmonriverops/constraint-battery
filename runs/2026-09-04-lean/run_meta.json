@@ -1,0 +1,10 @@
+{
+  "generated_at": "2026-09-04T04:35:54",
+  "db": "battery-lean.duckdb",
+  "probes": [
+    "p03",
+    "p04",
+    "p05",
+    "p08"
+  ]
+}

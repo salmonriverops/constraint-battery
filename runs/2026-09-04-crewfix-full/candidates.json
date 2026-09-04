@@ -1,0 +1,1736 @@
+{
+  "profile": {
+    "profile": "full",
+    "description": "Everything the export carries. The operator's own instrumented base.",
+    "export_dir": "data/export",
+    "skipped_source_tables": [],
+    "emptied_tables": [],
+    "nulled_columns": {},
+    "collapsed_resource_kind": false
+  },
+  "guards": {
+    "min_assignments_per_resource": 20,
+    "min_instances_per_work_type": 10,
+    "min_populated_rows_per_field": 50,
+    "min_observations": 50,
+    "min_change_events": 3
+  },
+  "input_volumes": {
+    "work": 706,
+    "resources": 152,
+    "assignments": 3206,
+    "locations": 35,
+    "location_travel": 13,
+    "changes": 400
+  },
+  "candidates": [
+    {
+      "probe": "p03",
+      "candidate_id": "p03-exclusivity-bus",
+      "proposed_type": "exclusivity",
+      "statement": "A Bus is sometimes booked on two jobs whose times overlap. This happened 80 times across 2 of them. Is the overlap allowed, or are these mistakes?",
+      "evidence": {
+        "overlapping_pairs": 80,
+        "resources_with_an_overlap": 2,
+        "examples": [
+          {
+            "resource_id": "vh_rec6IlzRY53J7AK71",
+            "work_id_a": "mv_recMvdaZ6qzv66EME",
+            "work_id_b": "op_recqCJCdG5BcWoOBL",
+            "a_start": "2026-06-23 22:00:00",
+            "a_end": "2026-06-24 01:00:00",
+            "b_start": "2026-06-22 17:00:00",
+            "b_end": "2026-06-24 21:00:00"
+          },
+          {
+            "resource_id": "vh_rec6IlzRY53J7AK71",
+            "work_id_a": "op_recyyLLMj0kRqlvmm",
+            "work_id_b": "op_recqCJCdG5BcWoOBL",
+            "a_start": "2026-06-24 15:00:00",
+            "a_end": "2026-06-24 22:00:00",
+            "b_start": "2026-06-22 17:00:00",
+            "b_end": "2026-06-24 21:00:00"
+          },
+          {
+            "resource_id": "vh_rec6IlzRY53J7AK71",
+            "work_id_a": "mv_recgGFoXmcRY4Wiqq",
+            "work_id_b": "op_recqCJCdG5BcWoOBL",
+            "a_start": "2026-06-24 18:00:00",
+            "a_end": "2026-06-24 20:00:00",
+            "b_start": "2026-06-22 17:00:00",
+            "b_end": "2026-06-24 21:00:00"
+          },
+          {
+            "resource_id": "vh_rec6IlzRY53J7AK71",
+            "work_id_a": "mv_recgGFoXmcRY4Wiqq",
+            "work_id_b": "op_recyyLLMj0kRqlvmm",
+            "a_start": "2026-06-24 18:00:00",
+            "a_end": "2026-06-24 20:00:00",
+            "b_start": "2026-06-24 15:00:00",
+            "b_end": "2026-06-24 22:00:00"
+          },
+          {
+            "resource_id": "vh_rec6IlzRY53J7AK71",
+            "work_id_a": "op_recFfywdfIryakQ2x",
+            "work_id_b": "op_rec7rnJs1NBhJHih8",
+            "a_start": "2026-06-25 17:00:00",
+            "a_end": "2026-06-27 21:00:00",
+            "b_start": "2026-06-26 15:00:00",
+            "b_end": "2026-06-26 22:00:00"
+          },
+          {
+            "resource_id": "vh_rec6IlzRY53J7AK71",
+            "work_id_a": "op_recFfywdfIryakQ2x",
+            "work_id_b": "mv_recdqkMSUIUzxXpo2",
+            "a_start": "2026-06-25 17:00:00",
+            "a_end": "2026-06-27 21:00:00",
+            "b_start": "2026-06-26 22:00:00",
+            "b_end": "2026-06-27 01:00:00"
+          },
+          {
+            "resource_id": "vh_rec6IlzRY53J7AK71",
+            "work_id_a": "op_recFfywdfIryakQ2x",
+            "work_id_b": "mv_recRgYx69i5Ptxk9p",
+            "a_start": "2026-06-25 17:00:00",
+            "a_end": "2026-06-27 21:00:00",
+            "b_start": "2026-06-27 18:00:00",
+            "b_end": "2026-06-27 20:00:00"
+          },
+          {
+            "resource_id": "vh_rec6IlzRY53J7AK71",
+            "work_id_a": "mv_rec98lv93UUduSACY",
+            "work_id_b": "op_recXmmYh4lU9LTF0i",
+            "a_start": "2026-07-01 18:00:00",
+            "a_end": "2026-07-01 20:00:00",
+            "b_start": "2026-06-29 17:00:01",
+            "b_end": "2026-07-01 21:00:01"
+          },
+          {
+            "resource_id": "vh_rec6IlzRY53J7AK71",
+            "work_id_a": "op_rec6Ia6rneZun0M9i",
+            "work_id_b": "op_recVEDt8iTm7Ct6Lj",
+            "a_start": "2026-07-02 17:00:00",
+            "a_end": "2026-07-04 21:00:00",
+            "b_start": "2026-07-02 17:00:00",
+            "b_end": "2026-07-04 22:00:01"
+          },
+          {
+            "resource_id": "vh_rec6IlzRY53J7AK71",
+            "work_id_a": "op_rec6Ia6rneZun0M9i",
+            "work_id_b": "op_recIHbJG6IiyAj4uJ",
+            "a_start": "2026-07-02 17:00:00",
+            "a_end": "2026-07-04 21:00:00",
+            "b_start": "2026-07-03 16:00:00",
+            "b_end": "2026-07-03 18:30:00"
+          }
+        ]
+      },
+      "confidence_inputs": {
+        "kind": "Bus",
+        "assignments_considered": 91,
+        "resources_over_assignment_floor": 2,
+        "resources_of_this_kind": 3,
+        "min_assignments_per_resource": 20
+      }
+    },
+    {
+      "probe": "p03",
+      "candidate_id": "p03-exclusivity-person",
+      "proposed_type": "exclusivity",
+      "statement": "A person is sometimes booked on two jobs whose times overlap. This happened 1161 times across 26 of them. Is the overlap allowed, or are these mistakes?",
+      "evidence": {
+        "overlapping_pairs": 1161,
+        "resources_with_an_overlap": 26,
+        "examples": [
+          {
+            "resource_id": "gs_rec0s8uPE8C3Pr2du",
+            "work_id_a": "op_recXvGNgIuB7CNDTQ",
+            "work_id_b": "op_reca1weqdAkyIcNjN",
+            "a_start": "2026-06-12 16:00:00",
+            "a_end": "2026-06-12 18:30:00",
+            "b_start": "2026-06-12 15:00:00",
+            "b_end": "2026-06-12 22:00:00"
+          },
+          {
+            "resource_id": "gs_rec0s8uPE8C3Pr2du",
+            "work_id_a": "op_recG47rVH6BeLLJwK",
+            "work_id_b": "op_reca1weqdAkyIcNjN",
+            "a_start": "2026-06-12 20:00:00",
+            "a_end": "2026-06-12 22:30:00",
+            "b_start": "2026-06-12 15:00:00",
+            "b_end": "2026-06-12 22:00:00"
+          },
+          {
+            "resource_id": "gs_rec0s8uPE8C3Pr2du",
+            "work_id_a": "op_recjZaBQV6EleEV5H",
+            "work_id_b": "op_rechUckR0E41v4wbY",
+            "a_start": "2026-06-16 15:00:00",
+            "a_end": "2026-06-16 22:00:00",
+            "b_start": "2026-06-16 16:00:00",
+            "b_end": "2026-06-16 18:30:00"
+          },
+          {
+            "resource_id": "gs_rec0s8uPE8C3Pr2du",
+            "work_id_a": "op_recFfywdfIryakQ2x",
+            "work_id_b": "mv_recdqkMSUIUzxXpo2",
+            "a_start": "2026-06-25 17:00:00",
+            "a_end": "2026-06-27 21:00:00",
+            "b_start": "2026-06-26 22:00:00",
+            "b_end": "2026-06-27 01:00:00"
+          },
+          {
+            "resource_id": "gs_rec0s8uPE8C3Pr2du",
+            "work_id_a": "op_recFfywdfIryakQ2x",
+            "work_id_b": "mv_recdqkMSUIUzxXpo2",
+            "a_start": "2026-06-25 17:00:00",
+            "a_end": "2026-06-27 21:00:00",
+            "b_start": "2026-06-26 22:00:00",
+            "b_end": "2026-06-27 01:00:00"
+          },
+          {
+            "resource_id": "gs_rec0s8uPE8C3Pr2du",
+            "work_id_a": "mv_recdqkMSUIUzxXpo2",
+            "work_id_b": "op_recFfywdfIryakQ2x",
+            "a_start": "2026-06-26 22:00:00",
+            "a_end": "2026-06-27 01:00:00",
+            "b_start": "2026-06-25 17:00:00",
+            "b_end": "2026-06-27 21:00:00"
+          },
+          {
+            "resource_id": "gs_rec0s8uPE8C3Pr2du",
+            "work_id_a": "mv_recdqkMSUIUzxXpo2",
+            "work_id_b": "op_recFfywdfIryakQ2x",
+            "a_start": "2026-06-26 22:00:00",
+            "a_end": "2026-06-27 01:00:00",
+            "b_start": "2026-06-25 17:00:00",
+            "b_end": "2026-06-27 21:00:00"
+          },
+          {
+            "resource_id": "gs_rec0s8uPE8C3Pr2du",
+            "work_id_a": "mv_rec4x2Sz4Cq9OeVFm",
+            "work_id_b": "op_recM1berJaElInytC",
+            "a_start": "2026-07-09 15:00:00",
+            "a_end": "2026-07-09 20:30:00",
+            "b_start": "2026-07-09 15:00:00",
+            "b_end": "2026-07-09 22:00:00"
+          },
+          {
+            "resource_id": "gs_rec0s8uPE8C3Pr2du",
+            "work_id_a": "op_recM1berJaElInytC",
+            "work_id_b": "mv_rec4x2Sz4Cq9OeVFm",
+            "a_start": "2026-07-09 15:00:00",
+            "a_end": "2026-07-09 22:00:00",
+            "b_start": "2026-07-09 15:00:00",
+            "b_end": "2026-07-09 20:30:00"
+          },
+          {
+            "resource_id": "gs_rec0s8uPE8C3Pr2du",
+            "work_id_a": "op_recM1berJaElInytC",
+            "work_id_b": "mv_rec4x2Sz4Cq9OeVFm",
+            "a_start": "2026-07-09 15:00:00",
+            "a_end": "2026-07-09 22:00:00",
+            "b_start": "2026-07-09 15:00:00",
+            "b_end": "2026-07-09 20:30:00"
+          }
+        ]
+      },
+      "confidence_inputs": {
+        "kind": "person",
+        "assignments_considered": 1689,
+        "resources_over_assignment_floor": 32,
+        "resources_of_this_kind": 55,
+        "min_assignments_per_resource": 20
+      }
+    },
+    {
+      "probe": "p03",
+      "candidate_id": "p03-exclusivity-trailer",
+      "proposed_type": "exclusivity",
+      "statement": "A Trailer is sometimes booked on two jobs whose times overlap. This happened 196 times across 6 of them. Is the overlap allowed, or are these mistakes?",
+      "evidence": {
+        "overlapping_pairs": 196,
+        "resources_with_an_overlap": 6,
+        "examples": [
+          {
+            "resource_id": "vh_rec7KtNpuQiP24SDT",
+            "work_id_a": "op_reciJlhtwMfFSVdSO",
+            "work_id_b": "op_rec3SPsqlM3G172Al",
+            "a_start": "2026-06-13 16:00:00",
+            "a_end": "2026-06-13 23:00:00",
+            "b_start": "2026-06-13 20:00:00",
+            "b_end": "2026-06-13 22:30:00"
+          },
+          {
+            "resource_id": "vh_rec7KtNpuQiP24SDT",
+            "work_id_a": "op_recHrsuRUrEXnUp4u",
+            "work_id_b": "op_recUXpKrBMRWG6W2o",
+            "a_start": "2026-06-15 15:00:00",
+            "a_end": "2026-06-15 22:00:00",
+            "b_start": "2026-06-15 20:00:00",
+            "b_end": "2026-06-15 22:30:00"
+          },
+          {
+            "resource_id": "vh_rec7KtNpuQiP24SDT",
+            "work_id_a": "op_recjZaBQV6EleEV5H",
+            "work_id_b": "op_rechUckR0E41v4wbY",
+            "a_start": "2026-06-16 15:00:00",
+            "a_end": "2026-06-16 22:00:00",
+            "b_start": "2026-06-16 16:00:00",
+            "b_end": "2026-06-16 18:30:00"
+          },
+          {
+            "resource_id": "vh_rec7KtNpuQiP24SDT",
+            "work_id_a": "op_reccTPLeQMTUILalN",
+            "work_id_b": "op_recOTfxjUMmXz9bd6",
+            "a_start": "2026-06-22 15:00:00",
+            "a_end": "2026-06-22 22:00:00",
+            "b_start": "2026-06-22 16:00:00",
+            "b_end": "2026-06-22 18:30:00"
+          },
+          {
+            "resource_id": "vh_rec7KtNpuQiP24SDT",
+            "work_id_a": "op_reccTPLeQMTUILalN",
+            "work_id_b": "op_recBJjvRDMzgsEW5S",
+            "a_start": "2026-06-22 15:00:00",
+            "a_end": "2026-06-22 22:00:00",
+            "b_start": "2026-06-22 20:00:00",
+            "b_end": "2026-06-22 22:30:00"
+          },
+          {
+            "resource_id": "vh_rec7KtNpuQiP24SDT",
+            "work_id_a": "op_recVdSfjaFS9bQOHh",
+            "work_id_b": "op_recjlmMspAVy898Xl",
+            "a_start": "2026-06-24 20:00:00",
+            "a_end": "2026-06-24 22:30:00",
+            "b_start": "2026-06-24 10:00:00",
+            "b_end": "2026-07-01 12:30:00"
+          },
+          {
+            "resource_id": "vh_rec7KtNpuQiP24SDT",
+            "work_id_a": "mv_recD6tT0FIZHPCeK1",
+            "work_id_b": "op_recjlmMspAVy898Xl",
+            "a_start": "2026-06-25 15:00:00",
+            "a_end": "2026-06-25 20:30:00",
+            "b_start": "2026-06-24 10:00:00",
+            "b_end": "2026-07-01 12:30:00"
+          },
+          {
+            "resource_id": "vh_rec7KtNpuQiP24SDT",
+            "work_id_a": "op_recFfywdfIryakQ2x",
+            "work_id_b": "op_recjlmMspAVy898Xl",
+            "a_start": "2026-06-25 17:00:00",
+            "a_end": "2026-06-27 21:00:00",
+            "b_start": "2026-06-24 10:00:00",
+            "b_end": "2026-07-01 12:30:00"
+          },
+          {
+            "resource_id": "vh_rec7KtNpuQiP24SDT",
+            "work_id_a": "op_recFfywdfIryakQ2x",
+            "work_id_b": "mv_recD6tT0FIZHPCeK1",
+            "a_start": "2026-06-25 17:00:00",
+            "a_end": "2026-06-27 21:00:00",
+            "b_start": "2026-06-25 15:00:00",
+            "b_end": "2026-06-25 20:30:00"
+          },
+          {
+            "resource_id": "vh_rec7KtNpuQiP24SDT",
+            "work_id_a": "op_recFfywdfIryakQ2x",
+            "work_id_b": "op_recjpHN9CuDmcZT8e",
+            "a_start": "2026-06-25 17:00:00",
+            "a_end": "2026-06-27 21:00:00",
+            "b_start": "2026-06-26 16:00:00",
+            "b_end": "2026-06-26 18:30:00"
+          }
+        ]
+      },
+      "confidence_inputs": {
+        "kind": "Trailer",
+        "assignments_considered": 309,
+        "resources_over_assignment_floor": 6,
+        "resources_of_this_kind": 6,
+        "min_assignments_per_resource": 20
+      }
+    },
+    {
+      "probe": "p03",
+      "candidate_id": "p03-exclusivity-van",
+      "proposed_type": "exclusivity",
+      "statement": "A Van is sometimes booked on two jobs whose times overlap. This happened 337 times across 6 of them. Is the overlap allowed, or are these mistakes?",
+      "evidence": {
+        "overlapping_pairs": 337,
+        "resources_with_an_overlap": 6,
+        "examples": [
+          {
+            "resource_id": "vh_rec4nC1LmBhnRXXEt",
+            "work_id_a": "op_reciJlhtwMfFSVdSO",
+            "work_id_b": "op_rec3SPsqlM3G172Al",
+            "a_start": "2026-06-13 16:00:00",
+            "a_end": "2026-06-13 23:00:00",
+            "b_start": "2026-06-13 20:00:00",
+            "b_end": "2026-06-13 22:30:00"
+          },
+          {
+            "resource_id": "vh_rec4nC1LmBhnRXXEt",
+            "work_id_a": "op_recUXpKrBMRWG6W2o",
+            "work_id_b": "op_recHrsuRUrEXnUp4u",
+            "a_start": "2026-06-15 20:00:00",
+            "a_end": "2026-06-15 22:30:00",
+            "b_start": "2026-06-15 15:00:00",
+            "b_end": "2026-06-15 22:00:00"
+          },
+          {
+            "resource_id": "vh_rec4nC1LmBhnRXXEt",
+            "work_id_a": "op_rechUckR0E41v4wbY",
+            "work_id_b": "op_recjZaBQV6EleEV5H",
+            "a_start": "2026-06-16 16:00:00",
+            "a_end": "2026-06-16 18:30:00",
+            "b_start": "2026-06-16 15:00:00",
+            "b_end": "2026-06-16 22:00:00"
+          },
+          {
+            "resource_id": "vh_rec4nC1LmBhnRXXEt",
+            "work_id_a": "op_recqCJCdG5BcWoOBL",
+            "work_id_b": "mv_recQJbGtM1OKaPjwP",
+            "a_start": "2026-06-22 17:00:00",
+            "a_end": "2026-06-24 21:00:00",
+            "b_start": "2026-06-22 15:00:00",
+            "b_end": "2026-06-22 20:30:00"
+          },
+          {
+            "resource_id": "vh_rec4nC1LmBhnRXXEt",
+            "work_id_a": "op_recqCJCdG5BcWoOBL",
+            "work_id_b": "mv_recMvdaZ6qzv66EME",
+            "a_start": "2026-06-22 17:00:00",
+            "a_end": "2026-06-24 21:00:00",
+            "b_start": "2026-06-23 22:00:00",
+            "b_end": "2026-06-24 01:00:00"
+          },
+          {
+            "resource_id": "vh_rec4nC1LmBhnRXXEt",
+            "work_id_a": "op_recqCJCdG5BcWoOBL",
+            "work_id_b": "op_recU3mEVpkJ30W9PE",
+            "a_start": "2026-06-22 17:00:00",
+            "a_end": "2026-06-24 21:00:00",
+            "b_start": "2026-06-24 16:00:00",
+            "b_end": "2026-06-24 18:30:00"
+          },
+          {
+            "resource_id": "vh_rec4nC1LmBhnRXXEt",
+            "work_id_a": "op_recqCJCdG5BcWoOBL",
+            "work_id_b": "mv_recgGFoXmcRY4Wiqq",
+            "a_start": "2026-06-22 17:00:00",
+            "a_end": "2026-06-24 21:00:00",
+            "b_start": "2026-06-24 18:00:00",
+            "b_end": "2026-06-24 20:00:00"
+          },
+          {
+            "resource_id": "vh_rec4nC1LmBhnRXXEt",
+            "work_id_a": "op_recU3mEVpkJ30W9PE",
+            "work_id_b": "mv_recgGFoXmcRY4Wiqq",
+            "a_start": "2026-06-24 16:00:00",
+            "a_end": "2026-06-24 18:30:00",
+            "b_start": "2026-06-24 18:00:00",
+            "b_end": "2026-06-24 20:00:00"
+          },
+          {
+            "resource_id": "vh_rec4nC1LmBhnRXXEt",
+            "work_id_a": "op_recFfywdfIryakQ2x",
+            "work_id_b": "mv_recD6tT0FIZHPCeK1",
+            "a_start": "2026-06-25 17:00:00",
+            "a_end": "2026-06-27 21:00:00",
+            "b_start": "2026-06-25 15:00:00",
+            "b_end": "2026-06-25 20:30:00"
+          },
+          {
+            "resource_id": "vh_rec4nC1LmBhnRXXEt",
+            "work_id_a": "op_recFfywdfIryakQ2x",
+            "work_id_b": "mv_recdqkMSUIUzxXpo2",
+            "a_start": "2026-06-25 17:00:00",
+            "a_end": "2026-06-27 21:00:00",
+            "b_start": "2026-06-26 22:00:00",
+            "b_end": "2026-06-27 01:00:00"
+          }
+        ]
+      },
+      "confidence_inputs": {
+        "kind": "Van",
+        "assignments_considered": 419,
+        "resources_over_assignment_floor": 6,
+        "resources_of_this_kind": 6,
+        "min_assignments_per_resource": 20
+      }
+    },
+    {
+      "probe": "p04",
+      "candidate_id": "p04-ceiling-customers-per-work",
+      "proposed_type": "capacity",
+      "statement": "The number of guests on one job tops out at 127, but only 1 times out of 433, and the numbers just below it thin out gradually. Is 127 a limit, or just the busiest it ever got?",
+      "evidence": {
+        "dimension": "customers_per_work",
+        "observed_max": 127,
+        "shape": "taper",
+        "count_at_max": 1,
+        "count_one_below_max": 0,
+        "share_at_max": 0.0023,
+        "max_over_busiest_value": 0.0227,
+        "cliff_ratio_used": 0.5,
+        "distribution": [
+          {
+            "value": 0,
+            "count": 42
+          },
+          {
+            "value": 1,
+            "count": 28
+          },
+          {
+            "value": 2,
+            "count": 44
+          },
+          {
+            "value": 3,
+            "count": 13
+          },
+          {
+            "value": 4,
+            "count": 29
+          },
+          {
+            "value": 5,
+            "count": 18
+          },
+          {
+            "value": 6,
+            "count": 30
+          },
+          {
+            "value": 7,
+            "count": 15
+          },
+          {
+            "value": 8,
+            "count": 17
+          },
+          {
+            "value": 9,
+            "count": 12
+          },
+          {
+            "value": 10,
+            "count": 16
+          },
+          {
+            "value": 11,
+            "count": 12
+          },
+          {
+            "value": 12,
+            "count": 12
+          },
+          {
+            "value": 13,
+            "count": 5
+          },
+          {
+            "value": 14,
+            "count": 7
+          },
+          {
+            "value": 15,
+            "count": 11
+          },
+          {
+            "value": 16,
+            "count": 5
+          },
+          {
+            "value": 17,
+            "count": 7
+          },
+          {
+            "value": 18,
+            "count": 5
+          },
+          {
+            "value": 19,
+            "count": 4
+          },
+          {
+            "value": 20,
+            "count": 5
+          },
+          {
+            "value": 21,
+            "count": 3
+          },
+          {
+            "value": 22,
+            "count": 9
+          },
+          {
+            "value": 23,
+            "count": 8
+          },
+          {
+            "value": 24,
+            "count": 14
+          },
+          {
+            "value": 25,
+            "count": 7
+          },
+          {
+            "value": 26,
+            "count": 2
+          },
+          {
+            "value": 27,
+            "count": 3
+          },
+          {
+            "value": 28,
+            "count": 1
+          },
+          {
+            "value": 29,
+            "count": 2
+          },
+          {
+            "value": 30,
+            "count": 4
+          },
+          {
+            "value": 31,
+            "count": 2
+          },
+          {
+            "value": 32,
+            "count": 1
+          },
+          {
+            "value": 33,
+            "count": 2
+          },
+          {
+            "value": 34,
+            "count": 3
+          },
+          {
+            "value": 35,
+            "count": 2
+          },
+          {
+            "value": 36,
+            "count": 1
+          },
+          {
+            "value": 37,
+            "count": 3
+          },
+          {
+            "value": 38,
+            "count": 1
+          },
+          {
+            "value": 39,
+            "count": 1
+          },
+          {
+            "value": 40,
+            "count": 4
+          },
+          {
+            "value": 41,
+            "count": 3
+          },
+          {
+            "value": 45,
+            "count": 1
+          },
+          {
+            "value": 46,
+            "count": 4
+          },
+          {
+            "value": 50,
+            "count": 2
+          },
+          {
+            "value": 54,
+            "count": 1
+          },
+          {
+            "value": 55,
+            "count": 1
+          },
+          {
+            "value": 58,
+            "count": 1
+          },
+          {
+            "value": 60,
+            "count": 1
+          },
+          {
+            "value": 61,
+            "count": 1
+          },
+          {
+            "value": 66,
+            "count": 1
+          },
+          {
+            "value": 69,
+            "count": 1
+          },
+          {
+            "value": 71,
+            "count": 1
+          },
+          {
+            "value": 77,
+            "count": 1
+          },
+          {
+            "value": 96,
+            "count": 1
+          },
+          {
+            "value": 105,
+            "count": 1
+          },
+          {
+            "value": 108,
+            "count": 1
+          },
+          {
+            "value": 127,
+            "count": 1
+          }
+        ]
+      },
+      "confidence_inputs": {
+        "observations": 433,
+        "distinct_values": 58,
+        "min_observations": 50
+      }
+    },
+    {
+      "probe": "p04",
+      "candidate_id": "p04-ceiling-resources-per-work",
+      "proposed_type": "capacity",
+      "statement": "The number of resources assigned to one job tops out at 37, but only 1 times out of 523, and the numbers just below it thin out gradually. Is 37 a limit, or just the busiest it ever got?",
+      "evidence": {
+        "dimension": "resources_per_work",
+        "observed_max": 37,
+        "shape": "taper",
+        "count_at_max": 1,
+        "count_one_below_max": 0,
+        "share_at_max": 0.0019,
+        "max_over_busiest_value": 0.0076,
+        "cliff_ratio_used": 0.5,
+        "distribution": [
+          {
+            "value": 1,
+            "count": 25
+          },
+          {
+            "value": 2,
+            "count": 64
+          },
+          {
+            "value": 3,
+            "count": 131
+          },
+          {
+            "value": 4,
+            "count": 73
+          },
+          {
+            "value": 5,
+            "count": 78
+          },
+          {
+            "value": 6,
+            "count": 25
+          },
+          {
+            "value": 7,
+            "count": 29
+          },
+          {
+            "value": 8,
+            "count": 26
+          },
+          {
+            "value": 9,
+            "count": 20
+          },
+          {
+            "value": 10,
+            "count": 14
+          },
+          {
+            "value": 11,
+            "count": 7
+          },
+          {
+            "value": 12,
+            "count": 8
+          },
+          {
+            "value": 13,
+            "count": 2
+          },
+          {
+            "value": 14,
+            "count": 4
+          },
+          {
+            "value": 15,
+            "count": 3
+          },
+          {
+            "value": 17,
+            "count": 2
+          },
+          {
+            "value": 18,
+            "count": 1
+          },
+          {
+            "value": 19,
+            "count": 1
+          },
+          {
+            "value": 20,
+            "count": 2
+          },
+          {
+            "value": 24,
+            "count": 1
+          },
+          {
+            "value": 25,
+            "count": 1
+          },
+          {
+            "value": 26,
+            "count": 2
+          },
+          {
+            "value": 27,
+            "count": 2
+          },
+          {
+            "value": 31,
+            "count": 1
+          },
+          {
+            "value": 37,
+            "count": 1
+          }
+        ]
+      },
+      "confidence_inputs": {
+        "observations": 523,
+        "distinct_values": 25,
+        "min_observations": 50
+      }
+    },
+    {
+      "probe": "p04",
+      "candidate_id": "p04-ceiling-work-per-day",
+      "proposed_type": "capacity",
+      "statement": "The number of jobs on one day tops out at 21, but only 1 times out of 136, and the numbers just below it thin out gradually. Is 21 a limit, or just the busiest it ever got?",
+      "evidence": {
+        "dimension": "work_per_day",
+        "observed_max": 21,
+        "shape": "taper",
+        "count_at_max": 1,
+        "count_one_below_max": 0,
+        "share_at_max": 0.0074,
+        "max_over_busiest_value": 0.0278,
+        "cliff_ratio_used": 0.5,
+        "distribution": [
+          {
+            "value": 1,
+            "count": 36
+          },
+          {
+            "value": 2,
+            "count": 19
+          },
+          {
+            "value": 3,
+            "count": 17
+          },
+          {
+            "value": 4,
+            "count": 6
+          },
+          {
+            "value": 5,
+            "count": 3
+          },
+          {
+            "value": 6,
+            "count": 10
+          },
+          {
+            "value": 7,
+            "count": 6
+          },
+          {
+            "value": 8,
+            "count": 7
+          },
+          {
+            "value": 9,
+            "count": 6
+          },
+          {
+            "value": 10,
+            "count": 7
+          },
+          {
+            "value": 11,
+            "count": 5
+          },
+          {
+            "value": 12,
+            "count": 1
+          },
+          {
+            "value": 13,
+            "count": 4
+          },
+          {
+            "value": 14,
+            "count": 5
+          },
+          {
+            "value": 15,
+            "count": 2
+          },
+          {
+            "value": 18,
+            "count": 1
+          },
+          {
+            "value": 21,
+            "count": 1
+          }
+        ]
+      },
+      "confidence_inputs": {
+        "observations": 136,
+        "distinct_values": 17,
+        "min_observations": 50
+      }
+    },
+    {
+      "probe": "p04",
+      "candidate_id": "p04-ceiling-work-per-location-per-day",
+      "proposed_type": "capacity",
+      "statement": "The number of jobs at one location on one day tops out at 4, but only 1 times out of 153, and the numbers just below it thin out gradually. Is 4 a limit, or just the busiest it ever got?",
+      "evidence": {
+        "dimension": "work_per_location_per_day",
+        "observed_max": 4,
+        "shape": "taper",
+        "count_at_max": 1,
+        "count_one_below_max": 8,
+        "share_at_max": 0.0065,
+        "max_over_busiest_value": 0.0088,
+        "cliff_ratio_used": 0.5,
+        "distribution": [
+          {
+            "value": 1,
+            "count": 114
+          },
+          {
+            "value": 2,
+            "count": 30
+          },
+          {
+            "value": 3,
+            "count": 8
+          },
+          {
+            "value": 4,
+            "count": 1
+          }
+        ]
+      },
+      "confidence_inputs": {
+        "observations": 153,
+        "distinct_values": 4,
+        "min_observations": 50
+      }
+    },
+    {
+      "probe": "p04",
+      "candidate_id": "p04-ceiling-work-per-resource-per-day",
+      "proposed_type": "capacity",
+      "statement": "The number of jobs for one resource on one day tops out at 7, but only 1 times out of 1903, and the numbers just below it thin out gradually. Is 7 a limit, or just the busiest it ever got?",
+      "evidence": {
+        "dimension": "work_per_resource_per_day",
+        "observed_max": 7,
+        "shape": "taper",
+        "count_at_max": 1,
+        "count_one_below_max": 3,
+        "share_at_max": 0.0005,
+        "max_over_busiest_value": 0.0007,
+        "cliff_ratio_used": 0.5,
+        "distribution": [
+          {
+            "value": 1,
+            "count": 1371
+          },
+          {
+            "value": 2,
+            "count": 346
+          },
+          {
+            "value": 3,
+            "count": 102
+          },
+          {
+            "value": 4,
+            "count": 51
+          },
+          {
+            "value": 5,
+            "count": 29
+          },
+          {
+            "value": 6,
+            "count": 3
+          },
+          {
+            "value": 7,
+            "count": 1
+          }
+        ]
+      },
+      "confidence_inputs": {
+        "observations": 1903,
+        "distinct_values": 7,
+        "min_observations": 50
+      }
+    },
+    {
+      "probe": "p05",
+      "candidate_id": "p05-population-work-type-by-status",
+      "proposed_type": "dependency",
+      "statement": "When status is 'Ran', work_type is filled in almost every time (322 of 322). When it is 'Planned', it is almost never filled in (0 of 70). Is work_type required for one and not the other?",
+      "evidence": {
+        "field": "work_type",
+        "partition": "status",
+        "required_in": {
+          "value": "Ran",
+          "rows": 322,
+          "filled": 322,
+          "fill_rate": 1.0
+        },
+        "absent_in": {
+          "value": "Planned",
+          "rows": 70,
+          "filled": 0,
+          "fill_rate": 0.0
+        },
+        "all_partitions": [
+          {
+            "value": "(blank)",
+            "rows": 180,
+            "filled": 21,
+            "fill_rate": 0.1167
+          },
+          {
+            "value": "Cancelled",
+            "rows": 63,
+            "filled": 24,
+            "fill_rate": 0.381
+          },
+          {
+            "value": "Planned",
+            "rows": 70,
+            "filled": 0,
+            "fill_rate": 0.0
+          },
+          {
+            "value": "Planning",
+            "rows": 70,
+            "filled": 70,
+            "fill_rate": 1.0
+          },
+          {
+            "value": "Ran",
+            "rows": 322,
+            "filled": 322,
+            "fill_rate": 1.0
+          }
+        ],
+        "high_threshold": 0.95,
+        "low_threshold": 0.05
+      },
+      "confidence_inputs": {
+        "rows_in_work": 706,
+        "rows_with_this_field_populated": 438,
+        "partitions_over_row_floor": 5,
+        "min_partition_rows": 10,
+        "min_populated_rows_per_field": 50
+      }
+    },
+    {
+      "probe": "p05",
+      "candidate_id": "p05-exemption-work-type-by-status-planned",
+      "proposed_type": "exemption",
+      "statement": "work_type is essentially never filled in when status is 'Planned' (0 of 70), though it is filled in elsewhere. Is that case exempt from needing work_type?",
+      "evidence": {
+        "field": "work_type",
+        "partition": "status",
+        "partition_value": "Planned",
+        "rows": 70,
+        "filled": 0,
+        "fill_rate": 0.0
+      },
+      "confidence_inputs": {
+        "rows_in_work": 706,
+        "rows_with_this_field_populated": 438,
+        "rows_in_this_partition": 70,
+        "min_partition_rows": 10
+      }
+    },
+    {
+      "probe": "p08",
+      "candidate_id": "p08-override-work-ovr-0a9e36c5ef2f",
+      "proposed_type": "any",
+      "statement": "Somebody went back and changed ovr_0a9e36c5ef2f on 4 work records, 4 times in all, after it had already been set. Typically 3 day(s) before the job, and 0 of them on the day or after. What is the system getting wrong that keeps needing this?",
+      "evidence": {
+        "entity_table": "work",
+        "field": "ovr_0a9e36c5ef2f",
+        "rank_by_frequency": 13,
+        "events": 4,
+        "distinct_entities": 4,
+        "distinct_actors": 1,
+        "actors": [
+          {
+            "changed_by": "manager",
+            "events": 4
+          }
+        ],
+        "first_seen": "2026-06-29 00:00:00",
+        "last_seen": "2026-07-22 00:00:00",
+        "lead_time_days": {
+          "n": 4,
+          "min_days": 1,
+          "median_days": 3,
+          "max_days": 3,
+          "same_day_or_later": 0
+        }
+      },
+      "confidence_inputs": {
+        "change_rows_total": 400,
+        "events_for_this_field": 4,
+        "min_events_per_field": 3,
+        "share_of_all_overrides": 0.01
+      }
+    },
+    {
+      "probe": "p08",
+      "candidate_id": "p08-override-work-ovr-0cd7af36191f",
+      "proposed_type": "any",
+      "statement": "Somebody went back and changed ovr_0cd7af36191f on 23 work records, 23 times in all, after it had already been set. Typically 3 day(s) before the job, and 6 of them on the day or after. What is the system getting wrong that keeps needing this?",
+      "evidence": {
+        "entity_table": "work",
+        "field": "ovr_0cd7af36191f",
+        "rank_by_frequency": 2,
+        "events": 23,
+        "distinct_entities": 23,
+        "distinct_actors": 1,
+        "actors": [
+          {
+            "changed_by": "manager",
+            "events": 23
+          }
+        ],
+        "first_seen": "2026-07-10 00:00:00",
+        "last_seen": "2026-08-16 00:00:00",
+        "lead_time_days": {
+          "n": 23,
+          "min_days": 0,
+          "median_days": 3,
+          "max_days": 15,
+          "same_day_or_later": 6
+        }
+      },
+      "confidence_inputs": {
+        "change_rows_total": 400,
+        "events_for_this_field": 23,
+        "min_events_per_field": 3,
+        "share_of_all_overrides": 0.0575
+      }
+    },
+    {
+      "probe": "p08",
+      "candidate_id": "p08-override-work-ovr-1b495b2aa25b",
+      "proposed_type": "any",
+      "statement": "Somebody went back and changed ovr_1b495b2aa25b on 3 work records, 3 times in all, after it had already been set. Typically 3 day(s) before the job, and 0 of them on the day or after. What is the system getting wrong that keeps needing this?",
+      "evidence": {
+        "entity_table": "work",
+        "field": "ovr_1b495b2aa25b",
+        "rank_by_frequency": 14,
+        "events": 3,
+        "distinct_entities": 3,
+        "distinct_actors": 1,
+        "actors": [
+          {
+            "changed_by": "manager",
+            "events": 3
+          }
+        ],
+        "first_seen": "2026-07-10 00:00:00",
+        "last_seen": "2026-07-22 00:00:00",
+        "lead_time_days": {
+          "n": 3,
+          "min_days": 2,
+          "median_days": 3,
+          "max_days": 7,
+          "same_day_or_later": 0
+        }
+      },
+      "confidence_inputs": {
+        "change_rows_total": 400,
+        "events_for_this_field": 3,
+        "min_events_per_field": 3,
+        "share_of_all_overrides": 0.0075
+      }
+    },
+    {
+      "probe": "p08",
+      "candidate_id": "p08-override-work-ovr-208d44cad2d2",
+      "proposed_type": "any",
+      "statement": "Somebody went back and changed ovr_208d44cad2d2 on 30 work records, 36 times in all, after it had already been set. Typically 1 day(s) before the job, and 11 of them on the day or after. What is the system getting wrong that keeps needing this?",
+      "evidence": {
+        "entity_table": "work",
+        "field": "ovr_208d44cad2d2",
+        "rank_by_frequency": 1,
+        "events": 36,
+        "distinct_entities": 30,
+        "distinct_actors": 1,
+        "actors": [
+          {
+            "changed_by": "manager",
+            "events": 36
+          }
+        ],
+        "first_seen": "2026-07-02 00:00:00",
+        "last_seen": "2026-08-19 00:00:00",
+        "lead_time_days": {
+          "n": 36,
+          "min_days": 0,
+          "median_days": 1,
+          "max_days": 6,
+          "same_day_or_later": 11
+        }
+      },
+      "confidence_inputs": {
+        "change_rows_total": 400,
+        "events_for_this_field": 36,
+        "min_events_per_field": 3,
+        "share_of_all_overrides": 0.09
+      }
+    },
+    {
+      "probe": "p08",
+      "candidate_id": "p08-override-work-ovr-264e4cce27ff",
+      "proposed_type": "any",
+      "statement": "Somebody went back and changed ovr_264e4cce27ff on 7 work records, 7 times in all, after it had already been set. Typically 3 day(s) before the job, and 1 of them on the day or after. What is the system getting wrong that keeps needing this?",
+      "evidence": {
+        "entity_table": "work",
+        "field": "ovr_264e4cce27ff",
+        "rank_by_frequency": 8,
+        "events": 7,
+        "distinct_entities": 7,
+        "distinct_actors": 1,
+        "actors": [
+          {
+            "changed_by": "manager",
+            "events": 7
+          }
+        ],
+        "first_seen": "2026-07-03 00:00:00",
+        "last_seen": "2026-08-15 00:00:00",
+        "lead_time_days": {
+          "n": 7,
+          "min_days": 0,
+          "median_days": 3,
+          "max_days": 4,
+          "same_day_or_later": 1
+        }
+      },
+      "confidence_inputs": {
+        "change_rows_total": 400,
+        "events_for_this_field": 7,
+        "min_events_per_field": 3,
+        "share_of_all_overrides": 0.0175
+      }
+    },
+    {
+      "probe": "p08",
+      "candidate_id": "p08-override-work-ovr-384927112582",
+      "proposed_type": "any",
+      "statement": "Somebody went back and changed ovr_384927112582 on 7 work records, 7 times in all, after it had already been set. Typically 7 day(s) before the job, and 0 of them on the day or after. What is the system getting wrong that keeps needing this?",
+      "evidence": {
+        "entity_table": "work",
+        "field": "ovr_384927112582",
+        "rank_by_frequency": 9,
+        "events": 7,
+        "distinct_entities": 7,
+        "distinct_actors": 1,
+        "actors": [
+          {
+            "changed_by": "manager",
+            "events": 7
+          }
+        ],
+        "first_seen": "2026-06-29 00:00:00",
+        "last_seen": "2026-08-11 00:00:00",
+        "lead_time_days": {
+          "n": 7,
+          "min_days": 2,
+          "median_days": 7,
+          "max_days": 14,
+          "same_day_or_later": 0
+        }
+      },
+      "confidence_inputs": {
+        "change_rows_total": 400,
+        "events_for_this_field": 7,
+        "min_events_per_field": 3,
+        "share_of_all_overrides": 0.0175
+      }
+    },
+    {
+      "probe": "p08",
+      "candidate_id": "p08-override-work-ovr-4d682831618d",
+      "proposed_type": "any",
+      "statement": "Somebody went back and changed ovr_4d682831618d on 11 work records, 11 times in all, after it had already been set. Typically 1 day(s) before the job, and 3 of them on the day or after. What is the system getting wrong that keeps needing this?",
+      "evidence": {
+        "entity_table": "work",
+        "field": "ovr_4d682831618d",
+        "rank_by_frequency": 5,
+        "events": 11,
+        "distinct_entities": 11,
+        "distinct_actors": 1,
+        "actors": [
+          {
+            "changed_by": "manager",
+            "events": 11
+          }
+        ],
+        "first_seen": "2026-07-02 00:00:00",
+        "last_seen": "2026-07-27 00:00:00",
+        "lead_time_days": {
+          "n": 11,
+          "min_days": 0,
+          "median_days": 1,
+          "max_days": 6,
+          "same_day_or_later": 3
+        }
+      },
+      "confidence_inputs": {
+        "change_rows_total": 400,
+        "events_for_this_field": 11,
+        "min_events_per_field": 3,
+        "share_of_all_overrides": 0.0275
+      }
+    },
+    {
+      "probe": "p08",
+      "candidate_id": "p08-override-work-ovr-6bd33d092af5",
+      "proposed_type": "any",
+      "statement": "Somebody went back and changed ovr_6bd33d092af5 on 3 work records, 3 times in all, after it had already been set. Typically 0 day(s) before the job, and 2 of them on the day or after. What is the system getting wrong that keeps needing this?",
+      "evidence": {
+        "entity_table": "work",
+        "field": "ovr_6bd33d092af5",
+        "rank_by_frequency": 15,
+        "events": 3,
+        "distinct_entities": 3,
+        "distinct_actors": 1,
+        "actors": [
+          {
+            "changed_by": "manager",
+            "events": 3
+          }
+        ],
+        "first_seen": "2026-07-04 00:00:00",
+        "last_seen": "2026-07-20 00:00:00",
+        "lead_time_days": {
+          "n": 3,
+          "min_days": 0,
+          "median_days": 0,
+          "max_days": 9,
+          "same_day_or_later": 2
+        }
+      },
+      "confidence_inputs": {
+        "change_rows_total": 400,
+        "events_for_this_field": 3,
+        "min_events_per_field": 3,
+        "share_of_all_overrides": 0.0075
+      }
+    },
+    {
+      "probe": "p08",
+      "candidate_id": "p08-override-work-ovr-6c27f1502e50",
+      "proposed_type": "any",
+      "statement": "Somebody went back and changed ovr_6c27f1502e50 on 8 work records, 8 times in all, after it had already been set. Typically 1 day(s) before the job, and 4 of them on the day or after. What is the system getting wrong that keeps needing this?",
+      "evidence": {
+        "entity_table": "work",
+        "field": "ovr_6c27f1502e50",
+        "rank_by_frequency": 7,
+        "events": 8,
+        "distinct_entities": 8,
+        "distinct_actors": 1,
+        "actors": [
+          {
+            "changed_by": "manager",
+            "events": 8
+          }
+        ],
+        "first_seen": "2026-06-29 00:00:00",
+        "last_seen": "2026-08-15 00:00:00",
+        "lead_time_days": {
+          "n": 8,
+          "min_days": 0,
+          "median_days": 1,
+          "max_days": 3,
+          "same_day_or_later": 4
+        }
+      },
+      "confidence_inputs": {
+        "change_rows_total": 400,
+        "events_for_this_field": 8,
+        "min_events_per_field": 3,
+        "share_of_all_overrides": 0.02
+      }
+    },
+    {
+      "probe": "p08",
+      "candidate_id": "p08-override-work-ovr-6f14edf07cf2",
+      "proposed_type": "any",
+      "statement": "Somebody went back and changed ovr_6f14edf07cf2 on 3 work records, 3 times in all, after it had already been set. Typically 5 day(s) before the job, and 0 of them on the day or after. What is the system getting wrong that keeps needing this?",
+      "evidence": {
+        "entity_table": "work",
+        "field": "ovr_6f14edf07cf2",
+        "rank_by_frequency": 16,
+        "events": 3,
+        "distinct_entities": 3,
+        "distinct_actors": 1,
+        "actors": [
+          {
+            "changed_by": "manager",
+            "events": 3
+          }
+        ],
+        "first_seen": "2026-07-03 00:00:00",
+        "last_seen": "2026-07-26 00:00:00",
+        "lead_time_days": {
+          "n": 3,
+          "min_days": 1,
+          "median_days": 5,
+          "max_days": 5,
+          "same_day_or_later": 0
+        }
+      },
+      "confidence_inputs": {
+        "change_rows_total": 400,
+        "events_for_this_field": 3,
+        "min_events_per_field": 3,
+        "share_of_all_overrides": 0.0075
+      }
+    },
+    {
+      "probe": "p08",
+      "candidate_id": "p08-override-work-ovr-7b8042acacfd",
+      "proposed_type": "any",
+      "statement": "Somebody went back and changed ovr_7b8042acacfd on 7 work records, 7 times in all, after it had already been set. Typically 3 day(s) before the job, and 1 of them on the day or after. What is the system getting wrong that keeps needing this?",
+      "evidence": {
+        "entity_table": "work",
+        "field": "ovr_7b8042acacfd",
+        "rank_by_frequency": 10,
+        "events": 7,
+        "distinct_entities": 7,
+        "distinct_actors": 1,
+        "actors": [
+          {
+            "changed_by": "manager",
+            "events": 7
+          }
+        ],
+        "first_seen": "2026-07-07 00:00:00",
+        "last_seen": "2026-08-16 00:00:00",
+        "lead_time_days": {
+          "n": 7,
+          "min_days": 0,
+          "median_days": 3,
+          "max_days": 13,
+          "same_day_or_later": 1
+        }
+      },
+      "confidence_inputs": {
+        "change_rows_total": 400,
+        "events_for_this_field": 7,
+        "min_events_per_field": 3,
+        "share_of_all_overrides": 0.0175
+      }
+    },
+    {
+      "probe": "p08",
+      "candidate_id": "p08-override-work-ovr-9e3bdb99b27b",
+      "proposed_type": "any",
+      "statement": "Somebody went back and changed ovr_9e3bdb99b27b on 3 work records, 3 times in all, after it had already been set. Typically 4 day(s) before the job, and 0 of them on the day or after. What is the system getting wrong that keeps needing this?",
+      "evidence": {
+        "entity_table": "work",
+        "field": "ovr_9e3bdb99b27b",
+        "rank_by_frequency": 17,
+        "events": 3,
+        "distinct_entities": 3,
+        "distinct_actors": 1,
+        "actors": [
+          {
+            "changed_by": "manager",
+            "events": 3
+          }
+        ],
+        "first_seen": "2026-07-27 00:00:00",
+        "last_seen": "2026-08-04 00:00:00",
+        "lead_time_days": {
+          "n": 3,
+          "min_days": 4,
+          "median_days": 4,
+          "max_days": 6,
+          "same_day_or_later": 0
+        }
+      },
+      "confidence_inputs": {
+        "change_rows_total": 400,
+        "events_for_this_field": 3,
+        "min_events_per_field": 3,
+        "share_of_all_overrides": 0.0075
+      }
+    },
+    {
+      "probe": "p08",
+      "candidate_id": "p08-override-work-ovr-b41bb92b8955",
+      "proposed_type": "any",
+      "statement": "Somebody went back and changed ovr_b41bb92b8955 on 9 work records, 9 times in all, after it had already been set. Typically 4 day(s) before the job, and 2 of them on the day or after. What is the system getting wrong that keeps needing this?",
+      "evidence": {
+        "entity_table": "work",
+        "field": "ovr_b41bb92b8955",
+        "rank_by_frequency": 6,
+        "events": 9,
+        "distinct_entities": 9,
+        "distinct_actors": 1,
+        "actors": [
+          {
+            "changed_by": "manager",
+            "events": 9
+          }
+        ],
+        "first_seen": "2026-06-29 00:00:00",
+        "last_seen": "2026-07-15 00:00:00",
+        "lead_time_days": {
+          "n": 9,
+          "min_days": 0,
+          "median_days": 4,
+          "max_days": 8,
+          "same_day_or_later": 2
+        }
+      },
+      "confidence_inputs": {
+        "change_rows_total": 400,
+        "events_for_this_field": 9,
+        "min_events_per_field": 3,
+        "share_of_all_overrides": 0.0225
+      }
+    },
+    {
+      "probe": "p08",
+      "candidate_id": "p08-override-work-ovr-bf5efa29e136",
+      "proposed_type": "any",
+      "statement": "Somebody went back and changed ovr_bf5efa29e136 on 7 work records, 7 times in all, after it had already been set. Typically 6 day(s) before the job, and 1 of them on the day or after. What is the system getting wrong that keeps needing this?",
+      "evidence": {
+        "entity_table": "work",
+        "field": "ovr_bf5efa29e136",
+        "rank_by_frequency": 11,
+        "events": 7,
+        "distinct_entities": 7,
+        "distinct_actors": 1,
+        "actors": [
+          {
+            "changed_by": "manager",
+            "events": 7
+          }
+        ],
+        "first_seen": "2026-06-29 00:00:00",
+        "last_seen": "2026-08-15 00:00:00",
+        "lead_time_days": {
+          "n": 7,
+          "min_days": 0,
+          "median_days": 6,
+          "max_days": 18,
+          "same_day_or_later": 1
+        }
+      },
+      "confidence_inputs": {
+        "change_rows_total": 400,
+        "events_for_this_field": 7,
+        "min_events_per_field": 3,
+        "share_of_all_overrides": 0.0175
+      }
+    },
+    {
+      "probe": "p08",
+      "candidate_id": "p08-override-work-ovr-e4b5f5e2c2d1",
+      "proposed_type": "any",
+      "statement": "Somebody went back and changed ovr_e4b5f5e2c2d1 on 5 work records, 5 times in all, after it had already been set. Typically 5 day(s) before the job, and 1 of them on the day or after. What is the system getting wrong that keeps needing this?",
+      "evidence": {
+        "entity_table": "work",
+        "field": "ovr_e4b5f5e2c2d1",
+        "rank_by_frequency": 12,
+        "events": 5,
+        "distinct_entities": 5,
+        "distinct_actors": 1,
+        "actors": [
+          {
+            "changed_by": "manager",
+            "events": 5
+          }
+        ],
+        "first_seen": "2026-06-29 00:00:00",
+        "last_seen": "2026-08-04 00:00:00",
+        "lead_time_days": {
+          "n": 5,
+          "min_days": -1,
+          "median_days": 5,
+          "max_days": 8,
+          "same_day_or_later": 1
+        }
+      },
+      "confidence_inputs": {
+        "change_rows_total": 400,
+        "events_for_this_field": 5,
+        "min_events_per_field": 3,
+        "share_of_all_overrides": 0.0125
+      }
+    },
+    {
+      "probe": "p08",
+      "candidate_id": "p08-override-work-ovr-e87673c6f82a",
+      "proposed_type": "any",
+      "statement": "Somebody went back and changed ovr_e87673c6f82a on 23 work records, 23 times in all, after it had already been set. Typically 1 day(s) before the job, and 8 of them on the day or after. What is the system getting wrong that keeps needing this?",
+      "evidence": {
+        "entity_table": "work",
+        "field": "ovr_e87673c6f82a",
+        "rank_by_frequency": 3,
+        "events": 23,
+        "distinct_entities": 23,
+        "distinct_actors": 1,
+        "actors": [
+          {
+            "changed_by": "manager",
+            "events": 23
+          }
+        ],
+        "first_seen": "2026-07-02 00:00:00",
+        "last_seen": "2026-08-17 00:00:00",
+        "lead_time_days": {
+          "n": 23,
+          "min_days": 0,
+          "median_days": 1,
+          "max_days": 5,
+          "same_day_or_later": 8
+        }
+      },
+      "confidence_inputs": {
+        "change_rows_total": 400,
+        "events_for_this_field": 23,
+        "min_events_per_field": 3,
+        "share_of_all_overrides": 0.0575
+      }
+    },
+    {
+      "probe": "p08",
+      "candidate_id": "p08-override-work-ovr-f3ebe5d06d50",
+      "proposed_type": "any",
+      "statement": "Somebody went back and changed ovr_f3ebe5d06d50 on 3 work records, 3 times in all, after it had already been set. Typically 5 day(s) before the job, and 0 of them on the day or after. What is the system getting wrong that keeps needing this?",
+      "evidence": {
+        "entity_table": "work",
+        "field": "ovr_f3ebe5d06d50",
+        "rank_by_frequency": 18,
+        "events": 3,
+        "distinct_entities": 3,
+        "distinct_actors": 1,
+        "actors": [
+          {
+            "changed_by": "manager",
+            "events": 3
+          }
+        ],
+        "first_seen": "2026-07-07 00:00:00",
+        "last_seen": "2026-07-15 00:00:00",
+        "lead_time_days": {
+          "n": 3,
+          "min_days": 2,
+          "median_days": 5,
+          "max_days": 7,
+          "same_day_or_later": 0
+        }
+      },
+      "confidence_inputs": {
+        "change_rows_total": 400,
+        "events_for_this_field": 3,
+        "min_events_per_field": 3,
+        "share_of_all_overrides": 0.0075
+      }
+    },
+    {
+      "probe": "p08",
+      "candidate_id": "p08-override-work-ovr-fc4e6af39b2a",
+      "proposed_type": "any",
+      "statement": "Somebody went back and changed ovr_fc4e6af39b2a on 14 work records, 14 times in all, after it had already been set. Typically 2 day(s) before the job, and 5 of them on the day or after. What is the system getting wrong that keeps needing this?",
+      "evidence": {
+        "entity_table": "work",
+        "field": "ovr_fc4e6af39b2a",
+        "rank_by_frequency": 4,
+        "events": 14,
+        "distinct_entities": 14,
+        "distinct_actors": 1,
+        "actors": [
+          {
+            "changed_by": "manager",
+            "events": 14
+          }
+        ],
+        "first_seen": "2026-06-29 00:00:00",
+        "last_seen": "2026-08-16 00:00:00",
+        "lead_time_days": {
+          "n": 14,
+          "min_days": 0,
+          "median_days": 2,
+          "max_days": 10,
+          "same_day_or_later": 5
+        }
+      },
+      "confidence_inputs": {
+        "change_rows_total": 400,
+        "events_for_this_field": 14,
+        "min_events_per_field": 3,
+        "share_of_all_overrides": 0.035
+      }
+    }
+  ]
+}
