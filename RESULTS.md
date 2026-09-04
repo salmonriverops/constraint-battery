@@ -71,10 +71,14 @@ scored. I also predicted at the start that the override log would produce the
 fewest findings of the four probes. It produced almost all of them.
 
 The answer key was frozen and hashed before either run. It was never edited.
-Every number above traces to a committed file, including the mistakes. The
-repository is private because it is built around my company's data, so
-"checkable" means I will walk anyone who asks through it rather than that you
-can go and look right now.
+Every number above traces to a committed file, including the mistakes, and the
+repository is public: https://github.com/salmonriverops/constraint-battery
+
+The key is in it. All 74 rules. Publishing the answer sheet is the only way the
+10 percent means anything, because a number scored against a key nobody can
+read is not a result, it is an assertion. Four employee names in my working
+notes were replaced with roles before publishing and `REDACTION.md` says exactly
+what changed and what did not.
 
 If you work on getting rules out of people, in research or in a product, the
 override log is where I would look first. I would like to compare notes.
