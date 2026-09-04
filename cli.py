@@ -794,6 +794,42 @@ def cmd_override(args):
           + ", ".join(f"{n} {name}" for name, n in sources.most_common()))
     print()
 
+    # Jobs that needed acknowledging more than once. A repeat means something was
+    # cleared and came back, which is a different story from a one time exception.
+    repeats = Counter(e for _, _, e, _, _, _, _, _ in rows)
+    again = {e: n for e, n in repeats.items() if n > 1}
+    if again:
+        print(f"{len(again)} job(s) were acknowledged more than once:")
+        for entity, n in sorted(again.items(), key=lambda kv: -kv[1]):
+            label = next((f"{w} on {st.strftime('%a %Y-%m-%d %H:%M')}" if st else w)
+                         for _, _, e, w, st, _, _, _ in rows if e == entity)
+            print(f"    {n} times   {label}")
+        print()
+
+    # Does a job this override touched actually carry an overlapping assignment?
+    # p03 asks that question of the data; this asks it of the jobs a human flagged.
+    # Where the two agree, the record and the judgement are describing one thing.
+    con = duckdb.connect(str(args.db), read_only=True)
+    try:
+        overlap_sql = """
+            SELECT count(DISTINCT a.work_id) FROM assignments a JOIN assignments b
+              ON a.resource_id = b.resource_id AND a.work_id <> b.work_id
+             AND a.start_ts < b.end_ts AND b.start_ts < a.end_ts
+            WHERE a.start_ts IS NOT NULL AND a.end_ts IS NOT NULL
+              AND b.start_ts IS NOT NULL AND b.end_ts IS NOT NULL"""
+        here_overlap = con.execute(
+            overlap_sql + " AND a.work_id IN (SELECT entity_id FROM changes WHERE field = ?)",
+            [field]).fetchone()[0]
+        all_overlap = con.execute(overlap_sql).fetchone()[0]
+    finally:
+        con.close()
+
+    if touched and all_work:
+        print(f"jobs carrying a resource that is also on an overlapping job:")
+        print(f"    here:        {here_overlap} of {touched}  ({here_overlap/touched:.0%})")
+        print(f"    everywhere:  {all_overlap} of {all_work}  ({all_overlap/all_work:.0%})")
+        print()
+
     print(f"{len(rows)} change(s)\n")
     for at, by, entity, wtype, start, guests, old, new in rows:
         where = ("Daily Ops" if str(entity).startswith("op_") else
