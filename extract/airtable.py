@@ -66,6 +66,8 @@ class Adapter:
         self.missing_columns = []   # (source table, column) pairs the export did not carry
         self.label_map = {}         # opaque id -> raw label, written outside git
         self.notes = []
+        self._rows = {}             # table -> rows, read once
+        self._columns = {}          # table -> every column name any row carries
 
     # -- helpers ---------------------------------------------------------
 
@@ -78,14 +80,28 @@ class Adapter:
         return False
 
     def _load(self, table):
-        rows = [_cells(r) for r in base.read_table(self.dir, table)]
-        return rows
+        if table not in self._rows:
+            rows = [_cells(r) for r in base.read_table(self.dir, table)]
+            # Airtable omits a field from a record when that record's cell is empty, so
+            # a column is present in the export if any row carries it. Judging presence
+            # from the first row alone silently nulls a whole column whenever the first
+            # record happens to have it blank, which is common and looks like thin data
+            # rather than a bug.
+            columns = set()
+            for row in rows:
+                columns.update(row)
+            self._rows[table] = rows
+            self._columns[table] = columns
+        return self._rows[table]
+
+    def _has(self, table, column):
+        return column in self._columns.get(table, set())
 
     def _get(self, rows, row, table, column):
         """Read a column, recording it once if the export does not carry it."""
         if column is None:
             return None
-        if rows and column not in rows[0]:
+        if rows and not self._has(table, column):
             entry = (table, column)
             if entry not in self.missing_columns:
                 self.missing_columns.append(entry)
@@ -261,7 +277,7 @@ class Adapter:
                 continue
             rows = self._load(table)
             column = spec["ack_column"]
-            if rows and column not in rows[0]:
+            if rows and not self._has(table, column):
                 self.missing_columns.append((table, column))
                 continue
             if not self.reveal_labels and not is_answer_key_field(column):
