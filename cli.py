@@ -719,12 +719,13 @@ def cmd_override(args):
     con = duckdb.connect(str(args.db), read_only=True)
     try:
         crew = {}
-        for wid, name, kind in con.execute("""
-                SELECT a.work_id, coalesce(r.name, a.resource_id), coalesce(r.kind, '?')
+        for wid, name, kind, roles in con.execute("""
+                SELECT a.work_id, coalesce(r.name, a.resource_id), coalesce(r.kind, '?'),
+                       string_agg(DISTINCT a.role, ', ')
                 FROM assignments a LEFT JOIN resources r ON r.resource_id = a.resource_id
                 WHERE a.work_id IN (SELECT entity_id FROM changes WHERE field = ?)
-                ORDER BY 3, 2""", [field]).fetchall():
-            crew.setdefault(wid, []).append((name, kind))
+                GROUP BY 1, 2, 3 ORDER BY 3, 2""", [field]).fetchall():
+            crew.setdefault(wid, []).append((name, kind, roles))
 
         # Does a kind of resource show up on these jobs more than on jobs generally?
         # That is what turns a hunch about what an override means into something
@@ -747,6 +748,30 @@ def cmd_override(args):
             GROUP BY 1""").fetchall())
     finally:
         con.close()
+
+    con = duckdb.connect(str(args.db), read_only=True)
+    try:
+        named = con.execute("""
+            WITH touched AS (SELECT DISTINCT entity_id FROM changes WHERE field = ?),
+            here AS (SELECT a.resource_id, count(DISTINCT a.work_id) AS n
+                     FROM assignments a JOIN touched t ON t.entity_id = a.work_id
+                     GROUP BY 1),
+            everywhere AS (SELECT resource_id, count(DISTINCT work_id) AS n
+                           FROM assignments GROUP BY 1)
+            SELECT coalesce(r.name, h.resource_id), coalesce(r.kind, '?'), h.n, e.n
+            FROM here h JOIN everywhere e ON e.resource_id = h.resource_id
+            LEFT JOIN resources r ON r.resource_id = h.resource_id
+            ORDER BY h.n DESC LIMIT 8""", [field]).fetchall()
+    finally:
+        con.close()
+
+    if named and touched and all_work:
+        print(f"\nthe resources most often on these {touched} job(s)\n")
+        print(f"    {'resource':<28}{'kind':<10}{'here':>8}{'everywhere':>13}")
+        for name, kind, n_here, n_all in named:
+            print(f"    {str(name)[:27]:<28}{kind[:9]:<10}"
+                  f"{n_here/touched:>7.0%}{n_all/all_work:>13.0%}")
+        print()
 
     if here and touched and all_work:
         print(f"resource kinds on the {touched} job(s) this override touched, "
@@ -785,8 +810,8 @@ def cmd_override(args):
             print(f"    {url}")
         if old or new:
             print(f"    {old!r} -> {new!r}")
-        for name, kind in crew.get(entity, []):
-            print(f"    - {name} [{kind}]")
+        for name, kind, roles in crew.get(entity, []):
+            print(f"    - {name} [{kind}] as {roles}")
         print()
     return 0
 
