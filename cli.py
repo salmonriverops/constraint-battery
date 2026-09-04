@@ -11,7 +11,9 @@ run never reads key/. That is enforced, not documented.
 from __future__ import annotations
 
 import argparse
+import csv
 import json
+import textwrap
 import sys
 from datetime import date, datetime
 from pathlib import Path
@@ -174,6 +176,75 @@ def cmd_score(args):
     return score_run(Path(args.run_dir), ROOT / "key")
 
 
+def cmd_show(args):
+    """Print the candidates one at a time, in match.csv order.
+
+    This displays. It does not decide. Reading a candidate and judging it is the
+    hand work the protocol reserves for a person, and nothing here proposes a
+    verdict or narrows the key rows worth considering.
+    """
+    run_dir = Path(args.run_dir)
+    payload = json.loads((run_dir / "candidates.json").read_text(encoding="utf-8"))
+    candidates = payload["candidates"]
+
+    done = {}
+    match_path = run_dir / "match.csv"
+    if match_path.exists():
+        with match_path.open(newline="", encoding="utf-8") as fh:
+            for row in csv.DictReader(fh):
+                if (row.get("verdict") or "").strip():
+                    done.setdefault(row["candidate_id"], []).append(row)
+
+    remaining = [c for c in candidates if c["candidate_id"] not in done]
+    if args.todo:
+        candidates = remaining
+
+    width = 78
+    for index, candidate in enumerate(candidates, 1):
+        cid = candidate["candidate_id"]
+        print("=" * width)
+        print(f"[{index} of {len(candidates)}]  {cid}   probe {candidate['probe']}   "
+              f"proposed type: {candidate['proposed_type']}")
+        print("=" * width)
+        print()
+        for line in textwrap.wrap(candidate["statement"], width):
+            print(f"  {line}")
+        print()
+        evidence = candidate.get("evidence") or {}
+        if evidence:
+            print("  evidence")
+            # Scalars first, they are the counts that make a candidate worth reading.
+            # Example rows go last and are capped, because the point of an example is
+            # to be checkable in the base, not exhaustive.
+            scalars = {k: v for k, v in evidence.items() if not isinstance(v, list)}
+            listy = {k: v for k, v in evidence.items() if isinstance(v, list)}
+            for key in sorted(scalars):
+                print(f"    {key}: {scalars[key]}")
+            for key in sorted(listy):
+                values = listy[key]
+                shown = values[:args.examples]
+                print(f"    {key}: {len(values)}")
+                for item in shown:
+                    if isinstance(item, dict):
+                        print(f"      - " + "  ".join(f"{k}={v}" for k, v in item.items()))
+                    else:
+                        print(f"      - {item}")
+                if len(values) > len(shown):
+                    print(f"      ... and {len(values) - len(shown)} more, "
+                          f"see candidates.json")
+            print()
+        if cid in done:
+            for row in done[cid]:
+                print(f"  already recorded: {row['verdict']} {row.get('key_id') or ''}")
+        else:
+            print(f"  match.csv row to fill:  {cid},<key_id or blank>,<MATCH|NEW|FALSE>,")
+        print()
+
+    print(f"{len(remaining)} of {len(payload['candidates'])} candidates still unjudged "
+          f"in {match_path}")
+    return 0
+
+
 def main(argv=None):
     parser = argparse.ArgumentParser(prog="cli.py", description=__doc__,
                                      formatter_class=argparse.RawDescriptionHelpFormatter)
@@ -189,6 +260,14 @@ def main(argv=None):
     p_load.add_argument("--reveal-override-labels", action="store_true",
                         help="load override labels verbatim. Invalidates a scored run.")
     p_load.set_defaults(func=cmd_load)
+
+    p_show = sub.add_parser("show", help="print the candidates for reading and judging")
+    p_show.add_argument("run_dir")
+    p_show.add_argument("--examples", type=int, default=3,
+                        help="example rows to print per candidate, default 3")
+    p_show.add_argument("--todo", action="store_true",
+                        help="only the candidates with no verdict yet in match.csv")
+    p_show.set_defaults(func=cmd_show)
 
     p_run = sub.add_parser("run", help="run all probes, write candidates.json")
     p_run.add_argument("--out", default=f"runs/{date.today().isoformat()}")
