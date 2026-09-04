@@ -61,3 +61,28 @@ Each claim above maps to something in the repository, and each is checkable.
 
 The numbers, when they exist, go in `runs/<date>-full/score.md`,
 `runs/<date>-lean/score.md` and `delta.md`. Whatever they say.
+
+---
+
+## Exposure note, 2026-09-04
+
+On 2026-09-04 the conflict checker source and the dispatch board source were
+pasted into the Claude session that built this battery. Both are on the
+denylist. They were sent by mistake and were meant for the key assembly
+session instead.
+
+What this does not affect. All probe logic, thresholds and the scorer were
+committed and pushed on 2026-08-29, six days earlier, in `b2355c6` and
+`4af86f6`. The lean profile landed in `0ff7326` on 2026-09-04 at 01:53 UTC,
+about two hours before the exposure. Git timestamps are the evidence. No
+part of the battery was written or tuned with knowledge of those files.
+
+What it does affect. From this point the build session is no longer a
+disinterested party on probe design. Any change after this note that alters
+what the battery detects, including any threshold, any new probe or any
+change to `probes/base.py`, is a v2 and needs its own pre-registration. It is
+not an edit to this one. Mechanical changes such as crash fixes, export
+plumbing and CLI wiring are unaffected.
+
+The answer key was assembled in a separate model with no access to this
+repository or this session, so the key itself is untouched.
