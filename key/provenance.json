@@ -1,0 +1,9 @@
+{
+  "assembled_by": "",
+  "assembled_on": "",
+  "method": "",
+  "web_search_used": null,
+  "source_documents": [],
+  "rows": 0,
+  "notes": "Stub. Replace with the provenance block the assembling session produces, then commit it with answer_key.csv and key_hash.txt before any run."
+}

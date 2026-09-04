@@ -38,6 +38,14 @@ def score_run(run_dir: Path, key_dir: Path):
     if not key_rows:
         raise SystemExit(f"{key_path} has no rows. Assemble and freeze the key first.")
 
+    provenance = {}
+    prov_path = key_dir / "provenance.json"
+    if prov_path.exists():
+        try:
+            provenance = json.loads(prov_path.read_text(encoding="utf-8"))
+        except json.JSONDecodeError:
+            provenance = {"notes": "provenance.json is present but does not parse"}
+
     digest = hashlib.sha256(key_path.read_bytes()).hexdigest()
     if hash_path.exists():
         recorded = hash_path.read_text(encoding="utf-8").split()[0].strip()
@@ -118,6 +126,32 @@ def score_run(run_dir: Path, key_dir: Path):
     add("")
     add(f"Key frozen and unmodified: {frozen}")
     add(f"Key sha256: `{digest}`")
+    add("")
+    add("## Key provenance")
+    add("")
+    if provenance and provenance.get("assembled_by"):
+        add(f"- Assembled by: {provenance.get('assembled_by')}")
+        add(f"- Assembled on: {provenance.get('assembled_on') or 'not recorded'}")
+        add(f"- Method: {provenance.get('method') or 'not recorded'}")
+        searched = provenance.get("web_search_used")
+        if searched is True:
+            add("- Web search used: **yes**. The key may be contaminated by published "
+                "writing about this project. Read the recall numbers with that in mind.")
+        elif searched is False:
+            add("- Web search used: no")
+        else:
+            add("- Web search used: not recorded")
+        sources = provenance.get("source_documents") or []
+        add(f"- Source documents: {', '.join(sources) if sources else 'not recorded'}")
+        claimed = provenance.get("rows")
+        if isinstance(claimed, int) and claimed and claimed != len(key_rows):
+            add(f"- Row count: provenance says {claimed}, the key file has "
+                f"{len(key_rows)}. They disagree.")
+        if provenance.get("notes"):
+            add(f"- Notes: {provenance['notes']}")
+    else:
+        add("Not recorded. `key/provenance.json` is missing or still a stub, so there "
+            "is no record of which model assembled this key or when.")
     add("")
     if unscored:
         add(f"> {unscored} of {total_candidates} candidates carry no verdict. "

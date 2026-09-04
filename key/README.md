@@ -19,6 +19,13 @@ it is complete, hash it and commit both files before any run.
 `score.py` recomputes the hash and says in `score.md` whether the key still matches
 what was frozen. A key edited after a run is a key that has been graded against.
 
+Commit `key/provenance.json` at the same time. It records which model assembled the
+key, on what date, from which documents, and whether web search was used. `score.md`
+prints it on every run, so that record lives in the protocol rather than in memory.
+Web search matters because published writing about this project describes the
+constraint taxonomy and several findings, and a session that read it is contaminated.
+See `ASSEMBLE_PROMPT.md`.
+
 **2. Pre-register the run.** Execute `cli.py run` and commit `candidates.json`
 before matching begins.
 
