@@ -28,3 +28,22 @@ verdicts recorded against it stay valid.
 
 Fix for v2. Count distinct pairs of work ids per resource, and carry the
 assignment roles as evidence rather than as separate rows.
+
+## The map read an empty column for Daily Ops crew
+
+Found 2026-09-04, before any run was scored. Fixed, and the run redone.
+
+`Guide Availability` exists on Daily Ops and is empty on all 412 records. The
+crew is in `Lead Guide (link)`, `Other Guides (link)`, `Drivers (link)`,
+`Store Staff` and `Food Crew`. The presence check added earlier reported the
+column as absent from the export, correctly, but the report was one line among
+many and it was read as thin data rather than as a wrong column.
+
+Effect on the first run. No guide on any day trip reached `assignments`.
+Anything about who works a trip, how many people a trip takes, or one person
+being in two places was measured against drivers alone.
+
+Lesson worth keeping. The loader should probably refuse, not warn, when a
+mapped column is absent from every record. A warning that appears next to nine
+other warnings is not a signal. Left as a v2 change so it does not alter
+behaviour mid protocol.

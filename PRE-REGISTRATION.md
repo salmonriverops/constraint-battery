@@ -120,3 +120,46 @@ after one.
 re-frozen at `8ab6bedd` the same day after the duplicate merge, the name
 redaction and this scope decision. No run had been executed against real data
 at either point. From `8ab6bedd` the key is read-only.
+
+---
+
+## A second run, and why, 2026-09-04
+
+The first run is pre-registered at `3b03f21` (full) and `4598a25` (lean) and
+stays in the repository exactly as it is. A second pair of runs follows it,
+because the first was built on a mapping error in the loader.
+
+The error. `extract/airtable_map.json` drew the crew on a Daily Op from a
+column named `Guide Availability`. That column exists, which is why nothing
+failed, but it is empty on all 412 records. The crew actually lives in five
+link columns: `Lead Guide (link)`, `Other Guides (link)`, `Drivers (link)`,
+`Store Staff` and `Food Crew`. So every guide on every day trip was absent
+from `assignments`, and the only people the battery could see on a day trip
+were drivers arriving through Rig Assignments.
+
+Why this is a legitimate correction rather than a second attempt at a better
+number. It is decidable without looking at any result: a column empty on 412
+of 412 records is objectively the wrong column, and the fix would be correct
+whether it raised the score or lowered it. It was found while reading a
+candidate, not while reading a score. No run has been scored at the time of
+writing, and `match.csv` for the first run is partly filled but not tallied.
+
+What does not change. The answer key stays frozen at `8ab6bedd`. No probe
+logic, threshold or guard is touched. The only change is which Airtable
+columns the adapter reads.
+
+What is reported. Both runs. The first is the result of the battery against a
+partial export, the second against a complete one, and the difference between
+them is itself a finding about how much the recoverable set depends on the
+operation instrumenting its own crew.
+
+Verdicts recorded against the first run are not carried across. The second run
+is judged from scratch.
+
+## Confirmed by the operator, 2026-09-04
+
+Nothing in the base links a trip to the boats that ran it. The 60 boats in
+`resources` can never appear in `assignments`, so every boat rule in the key
+is unrecoverable from this export by construction rather than by any failure
+of a probe. This is recorded before scoring so it cannot be offered afterwards
+as an excuse for a number.
