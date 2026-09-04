@@ -13,6 +13,7 @@ from __future__ import annotations
 import argparse
 import csv
 import json
+import os
 import textwrap
 import sys
 from datetime import date, datetime
@@ -22,6 +23,26 @@ ROOT = Path(__file__).resolve().parent
 sys.path.insert(0, str(ROOT))
 
 from extract.profiles import PROFILES  # noqa: E402
+
+
+def _prefix_to_table_id():
+    """Landing id prefix to Airtable table id, read from the map so it cannot drift."""
+    out = {}
+    path = ROOT / "extract" / "airtable_map.json"
+    if not path.exists():
+        return out
+    for specs in json.loads(path.read_text(encoding="utf-8")).values():
+        if not isinstance(specs, list):
+            continue
+        for spec in specs:
+            if isinstance(spec, dict) and spec.get("id_prefix") and spec.get("table_id"):
+                # First writer wins. location_travel reuses the lc_ prefix but points at
+                # Routes, and a location id must link to the Locations record.
+                out.setdefault(spec["id_prefix"], spec["table_id"])
+    return out
+
+
+PREFIX_TO_TABLE_ID = _prefix_to_table_id()
 
 DEFAULT_DB = ROOT / "battery.duckdb"
 KEY_DIR = (ROOT / "key").resolve()
@@ -176,6 +197,57 @@ def cmd_score(args):
     return score_run(Path(args.run_dir), ROOT / "key")
 
 
+def _resolver(db_path):
+    """Map a landing id to something a person can recognise.
+
+    Candidates carry ids because the committed record has to be stable and free of
+    names. Reading them is a different job: a human checking a candidate against the
+    source needs to see which guide and which trip. The names are resolved at display
+    time from the local database and never enter candidates.json.
+    """
+    import duckdb
+
+    labels = {}
+    if not Path(db_path).exists():
+        return labels
+    con = duckdb.connect(str(db_path), read_only=True)
+    try:
+        for rid, kind, name in con.execute(
+                "SELECT resource_id, kind, name FROM resources").fetchall():
+            labels[rid] = f"{name} ({kind})" if kind else str(name)
+        for wid, wtype, start in con.execute(
+                "SELECT work_id, work_type, start_ts FROM work").fetchall():
+            day = start.strftime("%Y-%m-%d %H:%M") if start else "no start time"
+            labels[wid] = f"{wtype or 'untyped'} on {day}"
+        for lid, name in con.execute(
+                "SELECT location_id, name FROM locations").fetchall():
+            labels[lid] = str(name)
+    finally:
+        con.close()
+    return labels
+
+
+def _airtable_url(landing_id, base):
+    """A link straight to the record, so a candidate can be checked in one click."""
+    if not base or "_rec" not in str(landing_id):
+        return None
+    prefix, _, record = str(landing_id).partition("_")
+    table_id = PREFIX_TO_TABLE_ID.get(prefix + "_")
+    if not table_id or not record.startswith("rec"):
+        return None
+    return f"https://airtable.com/{base}/{table_id}/{record}"
+
+
+def _describe(value, labels, base):
+    """Render one evidence value with its human label and link when there is one."""
+    text = str(value)
+    label = labels.get(text)
+    if label is None:
+        return text
+    url = _airtable_url(text, base)
+    return f"{label}" + (f"  {url}" if url else f"  [{text}]")
+
+
 def cmd_show(args):
     """Print the candidates one at a time, in match.csv order.
 
@@ -184,6 +256,10 @@ def cmd_show(args):
     verdict or narrows the key rows worth considering.
     """
     run_dir = Path(args.run_dir)
+    labels = _resolver(args.db)
+    if not labels:
+        print(f"note: {args.db} not found, so ids cannot be resolved to names. "
+              f"Pass --db if the database is elsewhere.\n")
     payload = json.loads((run_dir / "candidates.json").read_text(encoding="utf-8"))
     candidates = payload["candidates"]
 
@@ -226,9 +302,11 @@ def cmd_show(args):
                 print(f"    {key}: {len(values)}")
                 for item in shown:
                     if isinstance(item, dict):
-                        print(f"      - " + "  ".join(f"{k}={v}" for k, v in item.items()))
+                        print("      -")
+                        for k, v in item.items():
+                            print(f"          {k}: {_describe(v, labels, args.base)}")
                     else:
-                        print(f"      - {item}")
+                        print(f"      - {_describe(item, labels, args.base)}")
                 if len(values) > len(shown):
                     print(f"      ... and {len(values) - len(shown)} more, "
                           f"see candidates.json")
@@ -263,6 +341,11 @@ def main(argv=None):
 
     p_show = sub.add_parser("show", help="print the candidates for reading and judging")
     p_show.add_argument("run_dir")
+    p_show.add_argument("--db", default=str(DEFAULT_DB),
+                        help="database to resolve ids to names against")
+    p_show.add_argument("--base", default=os.environ.get("AIRTABLE_BASE", ""),
+                        help="Airtable base id, to print a link to each record. "
+                             "Defaults to $AIRTABLE_BASE.")
     p_show.add_argument("--examples", type=int, default=3,
                         help="example rows to print per candidate, default 3")
     p_show.add_argument("--todo", action="store_true",
