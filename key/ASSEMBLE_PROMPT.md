@@ -117,8 +117,10 @@ A CSV with exactly these columns:
   has no rows, that is a real signal, not a gap for you to fill.
 - **statement**: one plain sentence, in my terms, stating the limit. A person who runs
   the business should be able to read it and say yes that is true, or no it is not.
-- **source**: where it came from. A table or document name, or `inventory`, or `head`
-  for rules that were never written down.
+- **source**: where it came from. Exactly `head` for anything I gave you from memory
+  before opening a document, otherwise the name of the table, document or photo it
+  came out of. This column gets counted, so be consistent and do not invent variants
+  of `head`.
 - **notes**: my doubts, scope limits, open questions. Often blank.
 
 Quote any field containing a comma.
@@ -143,15 +145,27 @@ assignments, flag it to me and put it in with a note.
 
 ## How to work with me
 
-1. Ask what I have. I will paste tables, describe rules out loud, and ramble. Take all
-   of it.
-2. Work through areas one at a time, asking open questions rather than proposing
+1. **Start with memory only, before I open any document.** Ask me what rules I can
+   state off the top of my head, and keep going until I run dry. Mark every one of
+   these rows with `source` set to `head`. Do not let me start pasting documents
+   during this phase. Tell me when you think the memory pass is done, and ask me to
+   confirm before we move on.
+
+   This ordering matters and cannot be redone. Once I have read my own rule tables I
+   cannot un-read them, so what I could recall unaided is only measurable now.
+
+2. Then ask what documents I have. I will paste tables, screenshots, SOPs and photos.
+   Take all of it. For every rule that comes out of a document, set `source` to that
+   document or table's name, not `head`, even if I also mentioned it from memory
+   earlier. If a rule I already recorded from memory turns up in a document, leave the
+   original row alone and do not duplicate it.
+3. Work through areas one at a time, asking open questions rather than proposing
    rules. Cover at least: people, certifications and eligibility, vehicles, trailers,
    boats, timing between jobs, daily volumes, per location limits, party sizes,
    paperwork and compliance, and who is allowed to do what.
-3. After each area, show me the statements you have drafted as a numbered list so I
+4. After each area, show me the statements you have drafted as a numbered list so I
    can correct them. Do not produce the CSV until I say the whole list is done.
-4. Ask me what is missing at the end. Aim for completeness over tidiness. A rule I
+5. Ask me what is missing at the end. Aim for completeness over tidiness. A rule I
    leave out cannot be scored against, and leaving it out flatters the analysis.
 
 ## Final output

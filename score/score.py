@@ -116,6 +116,13 @@ def tally(run_dir: Path, key_rows):
         if row["key_id"] in matched_keys:
             by_type[ktype][0] += 1
 
+    by_source = defaultdict(lambda: [0, 0])
+    for row in key_rows:
+        ksource = (row.get("source") or "").strip().lower() or "(unrecorded)"
+        by_source[ksource][1] += 1
+        if row["key_id"] in matched_keys:
+            by_source[ksource][0] += 1
+
     by_probe = Counter(c["probe"] for c in candidates)
 
     return {
@@ -136,6 +143,7 @@ def tally(run_dir: Path, key_rows):
         "precision": precision_num / total_candidates if total_candidates else 0.0,
         "precision_num": precision_num,
         "by_type": by_type,
+        "by_source": by_source,
         "multi": sorted(cid for cid, e in per_candidate.items() if len(e["key_ids"]) > 1),
     }
 
@@ -166,6 +174,39 @@ def provenance_lines(provenance, key_rows):
     else:
         lines.append("Not recorded. `key/provenance.json` is missing or still a stub, so "
                      "there is no record of which model assembled this key or when.")
+    lines.append("")
+    return lines
+
+
+def recall_by(buckets, heading, column):
+    lines = [f"## Recall by {heading}", "", f"| {column} | Recovered | Of | Recall |",
+             "| --- | --- | --- | --- |"]
+    for name in sorted(buckets):
+        hit, total = buckets[name]
+        lines.append(f"| {name} | {hit} | {total} | {hit / total:.0%} |")
+    lines.append("")
+    return lines
+
+
+def memory_split(by_source):
+    """Recall against rules recalled unaided, against rules found in a document.
+
+    The key is assembled memory first, before any document is opened, so rows sourced
+    to 'head' are what the operator could produce without looking anything up. That
+    door only opens once, and the split is worth reporting on its own.
+    """
+    remembered = by_source.get("head")
+    if not remembered:
+        return []
+    hit, total = remembered
+    other_hit = sum(h for name, (h, _) in by_source.items() if name != "head")
+    other_total = sum(t for name, (_, t) in by_source.items() if name != "head")
+    lines = ["### Remembered against written down", ""]
+    lines.append(f"- Rules recalled unaided: {hit} of {total} recovered, "
+                 f"{hit / total:.0%}")
+    if other_total:
+        lines.append(f"- Rules found in a document: {other_hit} of {other_total} "
+                     f"recovered, {other_hit / other_total:.0%}")
     lines.append("")
     return lines
 
@@ -223,14 +264,9 @@ def score_run(run_dir: Path, key_dir: Path):
             f"and a two year manual effort did not write them down.")
         add("")
 
-    add("## Recall by constraint type")
-    add("")
-    add("| Type | Recovered | Of | Recall |")
-    add("| --- | --- | --- | --- |")
-    for ktype in sorted(t["by_type"]):
-        hit, total = t["by_type"][ktype]
-        add(f"| {ktype} | {hit} | {total} | {hit / total:.0%} |")
-    add("")
+    lines.extend(recall_by(t["by_type"], "constraint type", "Type"))
+    lines.extend(recall_by(t["by_source"], "source", "Source"))
+    lines.extend(memory_split(t["by_source"]))
 
     add("## New constraints found")
     add("")
@@ -343,6 +379,25 @@ def compare_runs(rich_dir: Path, lean_dir: Path, key_dir: Path, out_dir=None):
         else:
             verdict = "neither run found it"
         add(f"| {ktype} | {ah}/{total} | {bh}/{total} | {verdict} |")
+    add("")
+
+    add("## Which sources survive the degradation")
+    add("")
+    add("| Source | Richer | Leaner | Survives |")
+    add("| --- | --- | --- | --- |")
+    for ksource in sorted(set(a["by_source"]) | set(b["by_source"])):
+        ah, at = a["by_source"].get(ksource, [0, 0])
+        bh, bt = b["by_source"].get(ksource, [0, 0])
+        total = at or bt or 1
+        if ah and bh:
+            verdict = "yes" if bh >= ah else f"**partly, {ah - bh} lost**"
+        elif ah and not bh:
+            verdict = "**no, lost entirely**"
+        elif not ah and bh:
+            verdict = "only in the leaner run"
+        else:
+            verdict = "neither run found it"
+        add(f"| {ksource} | {ah}/{total} | {bh}/{total} | {verdict} |")
     add("")
 
     lost = [row for row in key_rows

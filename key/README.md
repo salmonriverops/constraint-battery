@@ -71,7 +71,11 @@ is tuning the key to the test.
 
 ## What the numbers mean
 
-- **Recall.** Key rows with at least one MATCH, over total key rows.
+- **Recall.** Key rows with at least one MATCH, over total key rows. Also broken out
+  by `type` and by `source`, and `score.md` reports the split between rules recalled
+  unaided (`source` of `head`) and rules found in a document. The key is assembled
+  memory first for that reason: once you have read your own rule tables you cannot
+  un-read them.
 - **Precision.** MATCH plus NEW, over total candidates.
 - **Novelty.** Count of NEW. Real constraints the battery found that a two-year
   manual effort did not.
