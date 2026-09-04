@@ -19,6 +19,8 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parent
 sys.path.insert(0, str(ROOT))
 
+from extract.profiles import PROFILES  # noqa: E402
+
 DEFAULT_DB = ROOT / "battery.duckdb"
 KEY_DIR = (ROOT / "key").resolve()
 
@@ -54,14 +56,22 @@ def cmd_load(args):
     from extract.denylist import DenylistViolation
     try:
         result = load(args.export_dir, args.db, source=args.source,
-                      reveal_labels=args.reveal_override_labels)
+                      reveal_labels=args.reveal_override_labels, profile=args.profile)
     except DenylistViolation as exc:
         print("\nLOAD REFUSED\n", file=sys.stderr)
         print(str(exc), file=sys.stderr)
         return 2
 
     print(f"loaded {args.export_dir} -> {args.db}")
-    print(f"  {result['files_checked']} files checked against the denylist, none matched\n")
+    print(f"  profile: {result['profile']}. {result['profile_description']}")
+    print(f"  {result['files_checked']} files checked against the denylist, none matched")
+    if result["skipped_source_tables"]:
+        print(f"  source tables not read: {', '.join(result['skipped_source_tables'])}")
+    if result["emptied_tables"]:
+        print(f"  landing tables left empty: {', '.join(result['emptied_tables'])}")
+    for table, columns in (result["nulled_columns"] or {}).items():
+        print(f"  columns left null: {table}.{', '.join(columns)}")
+    print()
     width = max(len(t) for t in result["counts"])
     for table, count in result["counts"].items():
         print(f"  {table.ljust(width)}  {count:>8,}")
@@ -97,6 +107,12 @@ def cmd_run(args):
         "min_change_events": args.min_change_events,
     }
 
+    sidecar = Path(f"{args.db}.profile.json")
+    profile = json.loads(sidecar.read_text(encoding="utf-8")) if sidecar.exists() else {
+        "profile": "unknown",
+        "description": "no profile sidecar beside this database, so the load predates "
+                       "profiles or the sidecar was removed"}
+
     con = duckdb.connect(str(args.db), read_only=True)
     candidates = []
     order = [p03_exclusivity, p04_ceilings, p05_population, p08_overrides]
@@ -117,7 +133,7 @@ def cmd_run(args):
     # candidates.json carries no wall clock, so a rerun on the same input is
     # byte identical and the pre-registration commit means what it says.
     (out_dir / "candidates.json").write_text(
-        json.dumps({"guards": guards, "input_volumes": volumes,
+        json.dumps({"profile": profile, "guards": guards, "input_volumes": volumes,
                     "candidates": candidates}, indent=2, sort_keys=False,
                    default=str) + "\n", encoding="utf-8")
 
@@ -135,6 +151,7 @@ def cmd_run(args):
     by_probe = {}
     for c in candidates:
         by_probe[c["probe"]] = by_probe.get(c["probe"], 0) + 1
+    print(f"profile: {profile.get('profile')}")
     print(f"{len(candidates)} candidates -> {out_dir / 'candidates.json'}")
     for probe in sorted(by_probe):
         print(f"  {probe}  {by_probe[probe]:>4}")
@@ -147,7 +164,13 @@ def cmd_run(args):
 # -- score ----------------------------------------------------------------
 
 def cmd_score(args):
-    from score.score import score_run
+    from score.score import compare_runs, score_run
+    if args.compare:
+        first, second = args.compare
+        return compare_runs(Path(first), Path(second), ROOT / "key",
+                            Path(args.out) if args.out else None)
+    if not args.run_dir:
+        raise SystemExit("give a run directory, or --compare <run_a> <run_b>")
     return score_run(Path(args.run_dir), ROOT / "key")
 
 
@@ -160,6 +183,9 @@ def main(argv=None):
     p_load.add_argument("export_dir")
     p_load.add_argument("--db", default=str(DEFAULT_DB))
     p_load.add_argument("--source", default="airtable")
+    p_load.add_argument("--profile", default="full", choices=sorted(PROFILES),
+                        help="full is the export as it stands. lean keeps only what a "
+                             "typical operation would plausibly produce.")
     p_load.add_argument("--reveal-override-labels", action="store_true",
                         help="load override labels verbatim. Invalidates a scored run.")
     p_load.set_defaults(func=cmd_load)
@@ -181,7 +207,10 @@ def main(argv=None):
     p_run.set_defaults(func=cmd_run)
 
     p_score = sub.add_parser("score", help="write score.md from a filled in match.csv")
-    p_score.add_argument("run_dir")
+    p_score.add_argument("run_dir", nargs="?")
+    p_score.add_argument("--compare", nargs=2, metavar=("RUN_A", "RUN_B"),
+                         help="write delta.md comparing two runs, richer first")
+    p_score.add_argument("--out", help="where delta.md goes, default the first run dir")
     p_score.set_defaults(func=cmd_score)
 
     args = parser.parse_args(argv)

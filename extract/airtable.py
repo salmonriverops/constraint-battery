@@ -56,16 +56,26 @@ def _label_key(label: str) -> str:
 
 
 class Adapter:
-    def __init__(self, export_dir: Path, extracted_at, reveal_labels=False):
+    def __init__(self, export_dir: Path, extracted_at, reveal_labels=False, profile=None):
         self.dir = Path(export_dir)
         self.extracted_at = extracted_at
         self.reveal_labels = reveal_labels
+        self.profile = profile or {}
+        self.skipped = []
         self.map = json.loads(MAP_PATH.read_text(encoding="utf-8"))
         self.missing_columns = []   # (source table, column) pairs the export did not carry
         self.label_map = {}         # opaque id -> raw label, written outside git
         self.notes = []
 
     # -- helpers ---------------------------------------------------------
+
+    def _skip(self, table):
+        """True when the active profile does not read this source table at all."""
+        if table in (self.profile.get("skip_source_tables") or []):
+            if table not in self.skipped:
+                self.skipped.append(table)
+            return True
+        return False
 
     def _load(self, table):
         rows = [_cells(r) for r in base.read_table(self.dir, table)]
@@ -87,6 +97,8 @@ class Adapter:
     def work(self):
         out = []
         for spec in self.map["work"]:
+            if self._skip(spec["table"]):
+                continue
             rows = self._load(spec["table"])
             for row in rows:
                 wid = _rid(row, spec.get("id_prefix", ""))
@@ -124,14 +136,21 @@ class Adapter:
     def resources(self):
         out = []
         for spec in self.map["resources"]:
+            if self._skip(spec["table"]):
+                continue
             rows = self._load(spec["table"])
             for row in rows:
                 rid = _rid(row, spec.get("id_prefix", ""))
                 if not rid:
                     continue
                 kind = spec.get("kind")
-                if spec.get("kind_column"):
-                    kind = base.scalar(self._get(rows, row, spec["table"], spec["kind_column"])) or kind
+                if self.profile.get("collapse_resource_kind"):
+                    # A vehicle list exists anywhere. A maintained type taxonomy on top
+                    # of it does not, so fall back to the spec's literal kind.
+                    kind = kind or spec.get("kind_fallback")
+                elif spec.get("kind_column"):
+                    kind = base.scalar(
+                        self._get(rows, row, spec["table"], spec["kind_column"])) or kind
                 out.append({
                     "resource_id": rid,
                     "kind": kind,
@@ -151,6 +170,8 @@ class Adapter:
         """
         out = []
         for spec in self.map["assignments"]:
+            if self._skip(spec["table"]):
+                continue
             rows = self._load(spec["table"])
             for row in rows:
                 work_ids = []
@@ -189,6 +210,8 @@ class Adapter:
     def locations(self):
         out = []
         for spec in self.map["locations"]:
+            if self._skip(spec["table"]):
+                continue
             rows = self._load(spec["table"])
             for row in rows:
                 lid = _rid(row, spec.get("id_prefix", ""))
@@ -202,6 +225,8 @@ class Adapter:
     def location_travel(self):
         out = []
         for spec in self.map["location_travel"]:
+            if self._skip(spec["table"]):
+                continue
             rows = self._load(spec["table"])
             for row in rows:
                 froms = base.links(self._get(rows, row, spec["table"], spec["from_link"]))
@@ -232,6 +257,8 @@ class Adapter:
         out = []
         for spec in self.map["changes"]:
             table = spec["table"]
+            if self._skip(table):
+                continue
             rows = self._load(table)
             column = spec["ack_column"]
             if rows and column not in rows[0]:
@@ -282,17 +309,24 @@ class Adapter:
 
 
 def build(export_dir: Path, cfg: dict):
-    adapter = Adapter(export_dir, cfg["extracted_at"], cfg.get("reveal_labels", False))
+    adapter = Adapter(export_dir, cfg["extracted_at"], cfg.get("reveal_labels", False),
+                      profile=cfg.get("profile"))
+    dropped = set((cfg.get("profile") or {}).get("drop_tables") or [])
     work_rows = adapter.work()
     work_index = {r["work_id"]: (r["start_ts"], r["end_ts"]) for r in work_rows}
-    tables = {
-        "work": work_rows,
-        "resources": adapter.resources(),
-        "assignments": adapter.assignments(work_index),
-        "locations": adapter.locations(),
-        "location_travel": adapter.location_travel(),
-        "changes": adapter.changes(),
+
+    # A dropped table is not built at all, so no work is wasted and no side effect of
+    # building it, such as the override label map, is produced.
+    builders = {
+        "work": lambda: work_rows,
+        "resources": adapter.resources,
+        "assignments": lambda: adapter.assignments(work_index),
+        "locations": adapter.locations,
+        "location_travel": adapter.location_travel,
+        "changes": adapter.changes,
     }
+    tables = {name: ([] if name in dropped else build_one())
+              for name, build_one in builders.items()}
     for name, rows in tables.items():
         if name not in ("locations", "location_travel"):
             base.stamp(rows, SOURCE_SYSTEM, cfg["extracted_at"])

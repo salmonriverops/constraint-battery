@@ -34,7 +34,7 @@
   "resources": [
     {"table": "Guides & Staff", "table_id": "tblTOwQO6EE0O1t38", "id_prefix": "gs_", "kind": "person",
      "name": "Name", "home_location_id": "Location base"},
-    {"table": "Vehicles", "table_id": "tblACvahdTII7DhnZ", "id_prefix": "vh_", "kind_column": "Type",
+    {"table": "Vehicles", "table_id": "tblACvahdTII7DhnZ", "id_prefix": "vh_", "kind_column": "Type", "kind_fallback": "vehicle",
      "name": "Unit name", "home_location_id": "Location base"},
     {"table": "Boats", "table_id": "tblEbXanQbIUQBTFJ", "id_prefix": "bt_", "kind": "boat",
      "name": "Boat number", "home_location_id": "Location"}

@@ -56,3 +56,19 @@ Allowed: operational transaction records. What work happened, who and what was
 assigned to it, when, where, what changed and when.
 
 Everything else is out of scope for version one. `money` is deliberately omitted.
+
+## Profiles
+
+`profiles.py` holds the export profiles. `full` is everything the export carries.
+`lean` keeps only what a typical operation would plausibly produce: transaction
+records for work, assignment records with times, and locations.
+
+The profile is chosen at load time, not at export time, so one export feeds both runs
+and the delta between them cannot be contaminated by source data changing between two
+pulls. The chosen profile is written to `<db>.profile.json` beside the database, which
+keeps the landing schema at six tables, and `cli.py run` copies it into
+`candidates.json` so a run always records which profile produced it.
+
+Each profile declares four things: source tables the adapter does not read, landing
+tables left empty, landing columns left null, and whether the resource kind taxonomy
+collapses. Every line carries its reasoning in the `rationale` list.

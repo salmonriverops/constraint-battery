@@ -3,6 +3,7 @@ data/
 runs/*/export/
 *.duckdb
 *.duckdb.wal
+*.duckdb.profile.json
 
 # Override label maps are answer-key material. See extract/README.md.
 *.labelmap.json

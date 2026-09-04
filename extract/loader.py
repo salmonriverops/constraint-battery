@@ -18,7 +18,7 @@ from pathlib import Path
 
 import duckdb
 
-from . import airtable
+from . import airtable, profiles
 from .base import LANDING_TABLES
 from .denylist import check_export_dir
 
@@ -41,7 +41,8 @@ COLUMNS = {
 }
 
 
-def load(export_dir, db_path, source="airtable", reveal_labels=False):
+def load(export_dir, db_path, source="airtable", reveal_labels=False, profile="full"):
+    profile_spec = profiles.get(profile)
     export_dir = Path(export_dir)
     if not export_dir.is_dir():
         raise SystemExit(f"Export directory not found: {export_dir}")
@@ -55,7 +56,18 @@ def load(export_dir, db_path, source="airtable", reveal_labels=False):
 
     extracted_at = datetime.utcnow().replace(microsecond=0)
     tables, adapter = adapter_module.build(
-        export_dir, {"extracted_at": extracted_at, "reveal_labels": reveal_labels})
+        export_dir, {"extracted_at": extracted_at, "reveal_labels": reveal_labels,
+                     "profile": profile_spec})
+
+    # The schema never changes between profiles. A dropped table is present and empty,
+    # a dropped column is present and null. That is the honest model of a leaner client:
+    # they have the concept, they just have no data in it.
+    for table in profile_spec["drop_tables"]:
+        tables[table] = []
+    for table, columns in profile_spec["drop_columns"].items():
+        for row in tables.get(table, []):
+            for column in columns:
+                row[column] = None
 
     db_path = Path(db_path)
     if db_path.exists():
@@ -84,7 +96,24 @@ def load(export_dir, db_path, source="airtable", reveal_labels=False):
     else:
         map_path = None
 
+    # The profile lives beside the database rather than inside it, so the landing
+    # schema stays at six tables.
+    Path(f"{db_path}.profile.json").write_text(
+        json.dumps({"profile": profile_spec["label"],
+                    "description": profile_spec["description"],
+                    "export_dir": str(export_dir),
+                    "skipped_source_tables": adapter.skipped,
+                    "emptied_tables": profile_spec["drop_tables"],
+                    "nulled_columns": profile_spec["drop_columns"],
+                    "collapsed_resource_kind": profile_spec["collapse_resource_kind"]},
+                   indent=2) + "\n", encoding="utf-8")
+
     return {
+        "profile": profile_spec["label"],
+        "profile_description": profile_spec["description"],
+        "skipped_source_tables": adapter.skipped,
+        "emptied_tables": profile_spec["drop_tables"],
+        "nulled_columns": profile_spec["drop_columns"],
         "counts": counts,
         "files_checked": len(files),
         "missing_columns": adapter.missing_columns,

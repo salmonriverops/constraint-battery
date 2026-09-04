@@ -87,6 +87,41 @@ resource needs at least 20 assignments, a work_type at least 10 instances, a fie
 least 50 populated rows. Every candidate carries the volumes it passed, under
 `confidence_inputs`, so you can see what it is standing on.
 
+## Two profiles, and why the delta is the finding
+
+The full export is far more structured than a typical target business will ever be.
+Two years of schema work went into it. A normal client has booking transaction
+history, maybe an assignment record, message threads, and some SOPs in a document
+nobody reads.
+
+So the battery runs twice on the same probes, and the delta is the real result.
+
+    python3 tools/export_airtable.py --base app... --out data/export   # once
+    python3 cli.py load data/export --profile full --db battery-full.duckdb
+    python3 cli.py load data/export --profile lean --db battery-lean.duckdb
+    python3 cli.py run --db battery-full.duckdb --out runs/<date>-full
+    python3 cli.py run --db battery-lean.duckdb --out runs/<date>-lean
+    python3 cli.py score --compare runs/<date>-full runs/<date>-lean
+
+Export once, load twice. Exporting twice would let the source data change between
+pulls, and the delta would then be measuring that drift as well as the degradation.
+One export means both runs provably read identical bytes.
+
+The cut list is in `extract/profiles.py`, declarative, with the reasoning for each
+line. The principle: drop anything that exists because the operator built it rather
+than because the operation produced it.
+
+The six table schema never changes between profiles. A dropped table is present and
+empty, a dropped column is present and null. That is the honest model of a leaner
+client, and it means p05, which measures fill rates, sees the thinning rather than
+being blinded to it.
+
+Both runs get committed before matching, and each needs its own `match.csv`.
+`delta.md` reports recall and precision side by side, which constraint types survive,
+and the key rows recovered in the richer run but lost in the leaner one. That last
+list is the deliverable for the next client: it names what a business has to be
+instrumented to produce before the battery is worth running on it.
+
 ## Handing this to someone else
 
 `BRIEFING.md` explains the project to a fresh session, for review or code work.

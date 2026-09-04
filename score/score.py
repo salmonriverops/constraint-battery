@@ -23,17 +23,11 @@ def read_csv(path):
                 if any((value or "").strip() for value in row.values())]
 
 
-def score_run(run_dir: Path, key_dir: Path):
-    run_dir, key_dir = Path(run_dir), Path(key_dir)
+def load_key(key_dir: Path):
+    """The frozen key, its hash state, and its provenance."""
     key_path = key_dir / "answer_key.csv"
-    hash_path = key_dir / "key_hash.txt"
-    match_path = run_dir / "match.csv"
-    candidates_path = run_dir / "candidates.json"
-
-    for path in (key_path, match_path, candidates_path):
-        if not path.exists():
-            raise SystemExit(f"missing {path}")
-
+    if not key_path.exists():
+        raise SystemExit(f"missing {key_path}")
     key_rows = read_csv(key_path)
     if not key_rows:
         raise SystemExit(f"{key_path} has no rows. Assemble and freeze the key first.")
@@ -47,20 +41,35 @@ def score_run(run_dir: Path, key_dir: Path):
             provenance = {"notes": "provenance.json is present but does not parse"}
 
     digest = hashlib.sha256(key_path.read_bytes()).hexdigest()
+    hash_path = key_dir / "key_hash.txt"
     if hash_path.exists():
         recorded = hash_path.read_text(encoding="utf-8").split()[0].strip()
         frozen = "yes" if recorded == digest else "NO, THE KEY HAS CHANGED SINCE IT WAS FROZEN"
     else:
         frozen = "NO, key_hash.txt does not exist"
+    return key_rows, digest, frozen, provenance
 
-    candidates = json.loads(candidates_path.read_text(encoding="utf-8"))["candidates"]
+
+def tally(run_dir: Path, key_rows):
+    """Read one run's candidates and match.csv and count them up.
+
+    No matching happens here. It reads the verdicts a human already wrote.
+    """
+    run_dir = Path(run_dir)
+    match_path = run_dir / "match.csv"
+    candidates_path = run_dir / "candidates.json"
+    for path in (match_path, candidates_path):
+        if not path.exists():
+            raise SystemExit(f"missing {path}")
+
+    payload = json.loads(candidates_path.read_text(encoding="utf-8"))
+    candidates = payload["candidates"]
     by_id = {c["candidate_id"]: c for c in candidates}
     key_by_id = {row["key_id"]: row for row in key_rows}
 
-    matches = read_csv(match_path)
     problems = []
-    verdicts, matched_keys, per_candidate = Counter(), defaultdict(list), {}
-    for row in matches:
+    matched_keys, per_candidate = defaultdict(list), {}
+    for row in read_csv(match_path):
         cid = (row.get("candidate_id") or "").strip()
         verdict = (row.get("verdict") or "").strip().upper()
         key_id = (row.get("key_id") or "").strip()
@@ -83,8 +92,7 @@ def score_run(run_dir: Path, key_dir: Path):
         # One candidate may recover more than one key row. Write one match.csv row
         # per pairing, repeating the candidate_id. Recall credits every key row
         # named. Precision counts the candidate once, never once per pairing.
-        entry = per_candidate.setdefault(
-            cid, {"verdict": verdict, "key_ids": [], "notes": []})
+        entry = per_candidate.setdefault(cid, {"verdict": verdict, "key_ids": [], "notes": []})
         if entry["verdict"] != verdict:
             problems.append(
                 f"{cid}: rows disagree on the verdict, {entry['verdict']} then {verdict}")
@@ -98,17 +106,9 @@ def score_run(run_dir: Path, key_dir: Path):
             matched_keys[key_id].append(cid)
 
     verdicts = Counter(entry["verdict"] for entry in per_candidate.values())
-    multi = sorted(cid for cid, entry in per_candidate.items() if len(entry["key_ids"]) > 1)
-
     total_candidates = len(candidates)
-    scored = len(per_candidate)
-    unscored = total_candidates - scored
-
-    recall = len(matched_keys) / len(key_rows)
     precision_num = verdicts["MATCH"] + verdicts["NEW"]
-    precision = precision_num / total_candidates if total_candidates else 0.0
 
-    # Recall by constraint type, using the type column in the key.
     by_type = defaultdict(lambda: [0, 0])
     for row in key_rows:
         ktype = (row.get("type") or "(untyped)").strip() or "(untyped)"
@@ -116,82 +116,119 @@ def score_run(run_dir: Path, key_dir: Path):
         if row["key_id"] in matched_keys:
             by_type[ktype][0] += 1
 
-    unrecovered = [row for row in key_rows if row["key_id"] not in matched_keys]
-    novel = [(cid, "; ".join(per_candidate[cid]["notes"])) for cid in sorted(per_candidate)
-             if per_candidate[cid]["verdict"] == "NEW"]
+    by_probe = Counter(c["probe"] for c in candidates)
+
+    return {
+        "run_dir": run_dir,
+        "profile": (payload.get("profile") or {}).get("profile", "unknown"),
+        "input_volumes": payload.get("input_volumes", {}),
+        "candidates": candidates,
+        "by_id": by_id,
+        "by_probe": by_probe,
+        "problems": problems,
+        "per_candidate": per_candidate,
+        "matched_keys": matched_keys,
+        "verdicts": verdicts,
+        "total_candidates": total_candidates,
+        "scored": len(per_candidate),
+        "unscored": total_candidates - len(per_candidate),
+        "recall": len(matched_keys) / len(key_rows),
+        "precision": precision_num / total_candidates if total_candidates else 0.0,
+        "precision_num": precision_num,
+        "by_type": by_type,
+        "multi": sorted(cid for cid, e in per_candidate.items() if len(e["key_ids"]) > 1),
+    }
+
+
+def provenance_lines(provenance, key_rows):
+    lines = ["## Key provenance", ""]
+    if provenance and provenance.get("assembled_by"):
+        lines.append(f"- Assembled by: {provenance.get('assembled_by')}")
+        lines.append(f"- Assembled on: {provenance.get('assembled_on') or 'not recorded'}")
+        lines.append(f"- Method: {provenance.get('method') or 'not recorded'}")
+        searched = provenance.get("web_search_used")
+        if searched is True:
+            lines.append("- Web search used: **yes**. The key may be contaminated by "
+                         "published writing about this project. Read the recall numbers "
+                         "with that in mind.")
+        elif searched is False:
+            lines.append("- Web search used: no")
+        else:
+            lines.append("- Web search used: not recorded")
+        sources = provenance.get("source_documents") or []
+        lines.append(f"- Source documents: {', '.join(sources) if sources else 'not recorded'}")
+        claimed = provenance.get("rows")
+        if isinstance(claimed, int) and claimed and claimed != len(key_rows):
+            lines.append(f"- Row count: provenance says {claimed}, the key file has "
+                         f"{len(key_rows)}. They disagree.")
+        if provenance.get("notes"):
+            lines.append(f"- Notes: {provenance['notes']}")
+    else:
+        lines.append("Not recorded. `key/provenance.json` is missing or still a stub, so "
+                     "there is no record of which model assembled this key or when.")
+    lines.append("")
+    return lines
+
+
+def score_run(run_dir: Path, key_dir: Path):
+    run_dir, key_dir = Path(run_dir), Path(key_dir)
+    key_rows, digest, frozen, provenance = load_key(key_dir)
+    t = tally(run_dir, key_rows)
+
+    unrecovered = [row for row in key_rows if row["key_id"] not in t["matched_keys"]]
+    novel = [(cid, "; ".join(t["per_candidate"][cid]["notes"]))
+             for cid in sorted(t["per_candidate"])
+             if t["per_candidate"][cid]["verdict"] == "NEW"]
 
     lines = []
     add = lines.append
     add(f"# Score, {run_dir.name}")
     add("")
+    add(f"Profile: {t['profile']}")
     add(f"Key frozen and unmodified: {frozen}")
     add(f"Key sha256: `{digest}`")
     add("")
-    add("## Key provenance")
-    add("")
-    if provenance and provenance.get("assembled_by"):
-        add(f"- Assembled by: {provenance.get('assembled_by')}")
-        add(f"- Assembled on: {provenance.get('assembled_on') or 'not recorded'}")
-        add(f"- Method: {provenance.get('method') or 'not recorded'}")
-        searched = provenance.get("web_search_used")
-        if searched is True:
-            add("- Web search used: **yes**. The key may be contaminated by published "
-                "writing about this project. Read the recall numbers with that in mind.")
-        elif searched is False:
-            add("- Web search used: no")
-        else:
-            add("- Web search used: not recorded")
-        sources = provenance.get("source_documents") or []
-        add(f"- Source documents: {', '.join(sources) if sources else 'not recorded'}")
-        claimed = provenance.get("rows")
-        if isinstance(claimed, int) and claimed and claimed != len(key_rows):
-            add(f"- Row count: provenance says {claimed}, the key file has "
-                f"{len(key_rows)}. They disagree.")
-        if provenance.get("notes"):
-            add(f"- Notes: {provenance['notes']}")
-    else:
-        add("Not recorded. `key/provenance.json` is missing or still a stub, so there "
-            "is no record of which model assembled this key or when.")
-    add("")
-    if unscored:
-        add(f"> {unscored} of {total_candidates} candidates carry no verdict. "
+    lines.extend(provenance_lines(provenance, key_rows))
+    if t["unscored"]:
+        add(f"> {t['unscored']} of {t['total_candidates']} candidates carry no verdict. "
             f"Precision below counts them against the battery, which is the honest "
             f"reading of an unfinished match.csv.")
         add("")
-    if problems:
+    if t["problems"]:
         add("## Problems in match.csv")
         add("")
-        for problem in problems:
+        for problem in t["problems"]:
             add(f"- {problem}")
         add("")
 
+    v = t["verdicts"]
     add("## Headline")
     add("")
     add("| Measure | Value | Of |")
     add("| --- | --- | --- |")
-    add(f"| Recall | {recall:.0%} | {len(matched_keys)} of {len(key_rows)} key rows |")
-    add(f"| Precision | {precision:.0%} | {precision_num} of {total_candidates} candidates |")
-    add(f"| Novelty | {verdicts['NEW']} | real constraints the key did not contain |")
-    add(f"| False | {verdicts['FALSE']} | candidates that were not constraints |")
+    add(f"| Recall | {t['recall']:.0%} | {len(t['matched_keys'])} of {len(key_rows)} key rows |")
+    add(f"| Precision | {t['precision']:.0%} | {t['precision_num']} of {t['total_candidates']} candidates |")
+    add(f"| Novelty | {v['NEW']} | real constraints the key did not contain |")
+    add(f"| False | {v['FALSE']} | candidates that were not constraints |")
     add("")
-    if multi:
-        add(f"{len(multi)} candidate(s) recovered more than one key row. Each is counted "
-            f"once in precision and credits every key row it named:")
+    if t["multi"]:
+        add(f"{len(t['multi'])} candidate(s) recovered more than one key row. Each is "
+            f"counted once in precision and credits every key row it named:")
         add("")
-        for cid in multi:
-            add(f"- {cid} covers {', '.join(per_candidate[cid]['key_ids'])}")
+        for cid in t["multi"]:
+            add(f"- {cid} covers {', '.join(t['per_candidate'][cid]['key_ids'])}")
         add("")
-    if verdicts["NEW"]:
-        add(f"Novelty is the number that matters. {verdicts['NEW']} constraint(s) here are "
-            f"real and a two-year manual effort did not write them down.")
+    if v["NEW"]:
+        add(f"Novelty is the number that matters. {v['NEW']} constraint(s) here are real "
+            f"and a two year manual effort did not write them down.")
         add("")
 
     add("## Recall by constraint type")
     add("")
     add("| Type | Recovered | Of | Recall |")
     add("| --- | --- | --- | --- |")
-    for ktype in sorted(by_type):
-        hit, total = by_type[ktype]
+    for ktype in sorted(t["by_type"]):
+        hit, total = t["by_type"][ktype]
         add(f"| {ktype} | {hit} | {total} | {hit / total:.0%} |")
     add("")
 
@@ -199,7 +236,7 @@ def score_run(run_dir: Path, key_dir: Path):
     add("")
     if novel:
         for cid, note in novel:
-            add(f"- **{cid}** ({by_id[cid]['proposed_type']}) {by_id[cid]['statement']}")
+            add(f"- **{cid}** ({t['by_id'][cid]['proposed_type']}) {t['by_id'][cid]['statement']}")
             if note:
                 add(f"  - {note}")
     else:
@@ -220,5 +257,146 @@ def score_run(run_dir: Path, key_dir: Path):
 
     text = "\n".join(lines) + "\n"
     (run_dir / "score.md").write_text(text, encoding="utf-8")
+    print(text)
+    return 0
+
+
+def compare_runs(rich_dir: Path, lean_dir: Path, key_dir: Path, out_dir=None):
+    """Report the delta between two runs of the same probes on different profiles.
+
+    The delta is the finding. The full export is far more structured than a typical
+    target business will ever be, so what survives the degradation is what the battery
+    can be expected to find at the next client.
+    """
+    rich_dir, lean_dir, key_dir = Path(rich_dir), Path(lean_dir), Path(key_dir)
+    key_rows, digest, frozen, provenance = load_key(key_dir)
+    a = tally(rich_dir, key_rows)
+    b = tally(lean_dir, key_rows)
+
+    lines = []
+    add = lines.append
+    add(f"# Delta, {rich_dir.name} against {lean_dir.name}")
+    add("")
+    add(f"- Richer run: `{rich_dir.name}`, profile {a['profile']}")
+    add(f"- Leaner run: `{lean_dir.name}`, profile {b['profile']}")
+    add(f"- Key frozen and unmodified: {frozen}")
+    add(f"- Key sha256: `{digest}`")
+    add("")
+    if a["profile"] == b["profile"]:
+        add(f"> Both runs carry the profile {a['profile']!r}. A delta between two runs of "
+            f"the same profile measures nothing about degradation.")
+        add("")
+    lines.extend(provenance_lines(provenance, key_rows))
+
+    for label, t in ((rich_dir.name, a), (lean_dir.name, b)):
+        if t["unscored"]:
+            add(f"> {label}: {t['unscored']} of {t['total_candidates']} candidates carry "
+                f"no verdict, counted against precision.")
+    if a["unscored"] or b["unscored"]:
+        add("")
+
+    add("## Headline")
+    add("")
+    add("| Measure | Richer | Leaner | Change |")
+    add("| --- | --- | --- | --- |")
+    add(f"| Recall | {a['recall']:.0%} | {b['recall']:.0%} | "
+        f"{(b['recall'] - a['recall']) * 100:+.0f} points |")
+    add(f"| Precision | {a['precision']:.0%} | {b['precision']:.0%} | "
+        f"{(b['precision'] - a['precision']) * 100:+.0f} points |")
+    add(f"| Novelty | {a['verdicts']['NEW']} | {b['verdicts']['NEW']} | "
+        f"{b['verdicts']['NEW'] - a['verdicts']['NEW']:+d} |")
+    add(f"| Candidates | {a['total_candidates']} | {b['total_candidates']} | "
+        f"{b['total_candidates'] - a['total_candidates']:+d} |")
+    add("")
+
+    add("## Input volumes")
+    add("")
+    add("| Landing table | Richer | Leaner |")
+    add("| --- | --- | --- |")
+    for table in sorted(set(a["input_volumes"]) | set(b["input_volumes"])):
+        add(f"| {table} | {a['input_volumes'].get(table, 0):,} | "
+            f"{b['input_volumes'].get(table, 0):,} |")
+    add("")
+
+    add("## Candidates by probe")
+    add("")
+    add("| Probe | Richer | Leaner |")
+    add("| --- | --- | --- |")
+    for probe in sorted(set(a["by_probe"]) | set(b["by_probe"])):
+        add(f"| {probe} | {a['by_probe'].get(probe, 0)} | {b['by_probe'].get(probe, 0)} |")
+    add("")
+
+    add("## Which constraint types survive the degradation")
+    add("")
+    add("| Type | Richer | Leaner | Survives |")
+    add("| --- | --- | --- | --- |")
+    for ktype in sorted(set(a["by_type"]) | set(b["by_type"])):
+        ah, at = a["by_type"].get(ktype, [0, 0])
+        bh, bt = b["by_type"].get(ktype, [0, 0])
+        total = at or bt or 1
+        if ah and bh:
+            verdict = "yes" if bh >= ah else f"**partly, {ah - bh} lost**"
+        elif ah and not bh:
+            verdict = "**no, lost entirely**"
+        elif not ah and bh:
+            verdict = "only in the leaner run"
+        else:
+            verdict = "neither run found it"
+        add(f"| {ktype} | {ah}/{total} | {bh}/{total} | {verdict} |")
+    add("")
+
+    lost = [row for row in key_rows
+            if row["key_id"] in a["matched_keys"] and row["key_id"] not in b["matched_keys"]]
+    gained = [row for row in key_rows
+              if row["key_id"] in b["matched_keys"] and row["key_id"] not in a["matched_keys"]]
+
+    add("## Recovered in the richer run, lost in the leaner one")
+    add("")
+    add("This is the deliverable for the next client. Each line names something the "
+        "battery can only find if the business is instrumented to produce it.")
+    add("")
+    if lost:
+        for row in lost:
+            add(f"- **{row['key_id']}** ({(row.get('type') or '').strip()}) "
+                f"{(row.get('statement') or '').strip()}")
+            add(f"  - found by: {', '.join(a['matched_keys'][row['key_id']])}")
+    else:
+        add("Nothing. Every key row the richer run recovered survived the degradation.")
+    add("")
+
+    if gained:
+        add("## Recovered in the leaner run only")
+        add("")
+        add("Unexpected. Worth understanding before trusting either number.")
+        add("")
+        for row in gained:
+            add(f"- **{row['key_id']}** {(row.get('statement') or '').strip()}")
+            add(f"  - found by: {', '.join(b['matched_keys'][row['key_id']])}")
+        add("")
+
+    only_rich = sorted(set(a["by_id"]) - set(b["by_id"]))
+    only_lean = sorted(set(b["by_id"]) - set(a["by_id"]))
+    add("## Candidates present in one run only")
+    add("")
+    if only_rich:
+        add(f"Only in `{rich_dir.name}` ({len(only_rich)}):")
+        add("")
+        for cid in only_rich:
+            add(f"- {cid}")
+        add("")
+    if only_lean:
+        add(f"Only in `{lean_dir.name}` ({len(only_lean)}):")
+        add("")
+        for cid in only_lean:
+            add(f"- {cid}")
+        add("")
+    if not only_rich and not only_lean:
+        add("Both runs produced the same candidate ids.")
+        add("")
+
+    text = "\n".join(lines) + "\n"
+    target = Path(out_dir) if out_dir else rich_dir
+    target.mkdir(parents=True, exist_ok=True)
+    (target / "delta.md").write_text(text, encoding="utf-8")
     print(text)
     return 0
