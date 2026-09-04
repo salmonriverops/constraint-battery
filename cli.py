@@ -521,10 +521,15 @@ PEAKS = {
         GROUP BY 1 ORDER BY n DESC, grp LIMIT ?"""),
 
     "work_per_resource_per_day": ("resource and day", """
-        SELECT coalesce(r.name, a.resource_id) || '  ' || cast(a.start_ts AS DATE) AS grp,
+        SELECT coalesce(r.name, a.resource_id) || '  (' || coalesce(r.kind, 'unknown')
+                 || ')  ' || strftime(cast(a.start_ts AS DATE), '%a %Y-%m-%d') AS grp,
                count(DISTINCT a.work_id) AS n,
-               string_agg(DISTINCT a.role, ', ') AS detail
-        FROM assignments a LEFT JOIN resources r ON r.resource_id = a.resource_id
+               string_agg(DISTINCT coalesce(w.work_type, 'untyped') || ' '
+                 || coalesce(strftime(a.start_ts, '%H:%M'), '') || ' as ' || a.role,
+                 ' | ') AS detail
+        FROM assignments a
+        LEFT JOIN resources r ON r.resource_id = a.resource_id
+        LEFT JOIN work w ON w.work_id = a.work_id
         WHERE a.start_ts IS NOT NULL GROUP BY 1 ORDER BY n DESC, grp LIMIT ?"""),
 
     "customers_per_work": ("job", """
