@@ -506,6 +506,73 @@ def cmd_judge(args):
     return 0
 
 
+PEAKS = {
+    "work_per_day": ("day", """
+        SELECT cast(w.start_ts AS DATE) AS grp, count(*) AS n,
+               string_agg(coalesce(w.work_type, 'untyped'), ', ' ORDER BY w.start_ts) AS detail
+        FROM work w WHERE w.start_ts IS NOT NULL GROUP BY 1 ORDER BY n DESC, grp LIMIT ?"""),
+
+    "work_per_location_per_day": ("location and day", """
+        SELECT coalesce(l.name, w.location_id) || '  ' || cast(w.start_ts AS DATE) AS grp,
+               count(*) AS n,
+               string_agg(coalesce(w.work_type, 'untyped'), ', ' ORDER BY w.start_ts) AS detail
+        FROM work w LEFT JOIN locations l ON l.location_id = w.location_id
+        WHERE w.start_ts IS NOT NULL AND w.location_id IS NOT NULL
+        GROUP BY 1 ORDER BY n DESC, grp LIMIT ?"""),
+
+    "work_per_resource_per_day": ("resource and day", """
+        SELECT coalesce(r.name, a.resource_id) || '  ' || cast(a.start_ts AS DATE) AS grp,
+               count(DISTINCT a.work_id) AS n,
+               string_agg(DISTINCT a.role, ', ') AS detail
+        FROM assignments a LEFT JOIN resources r ON r.resource_id = a.resource_id
+        WHERE a.start_ts IS NOT NULL GROUP BY 1 ORDER BY n DESC, grp LIMIT ?"""),
+
+    "customers_per_work": ("job", """
+        SELECT coalesce(w.work_type, 'untyped') || '  ' ||
+               coalesce(strftime(w.start_ts, '%a %Y-%m-%d %H:%M'), 'no start') AS grp,
+               w.customer_count AS n, w.work_id AS detail
+        FROM work w WHERE w.customer_count IS NOT NULL ORDER BY n DESC, grp LIMIT ?"""),
+
+    "resources_per_work": ("job", """
+        SELECT coalesce(w.work_type, 'untyped') || '  ' ||
+               coalesce(strftime(w.start_ts, '%a %Y-%m-%d %H:%M'), 'no start') AS grp,
+               count(DISTINCT a.resource_id) AS n,
+               string_agg(DISTINCT coalesce(r.name, a.resource_id), ', ') AS detail
+        FROM assignments a JOIN work w ON w.work_id = a.work_id
+        LEFT JOIN resources r ON r.resource_id = a.resource_id
+        GROUP BY w.work_id, 1 ORDER BY n DESC, grp LIMIT ?"""),
+}
+
+
+def cmd_peak(args):
+    """Show the rows behind the top of a p04 distribution.
+
+    A ceiling candidate reports that the maximum was N and how rare N was, which
+    is enough to ask the question and not enough to answer it. This names the
+    days, jobs or people at the top so the claim can be checked against the
+    source. It reads the database only. It touches no candidate and no verdict.
+    """
+    import duckdb
+
+    if args.dimension not in PEAKS:
+        raise SystemExit(f"unknown dimension {args.dimension!r}. "
+                         f"Known: {', '.join(sorted(PEAKS))}")
+    label, sql = PEAKS[args.dimension]
+    con = duckdb.connect(str(args.db), read_only=True)
+    try:
+        rows = con.execute(sql, [args.top]).fetchall()
+    finally:
+        con.close()
+
+    print(f"top {len(rows)} by {args.dimension}, one line per {label}\n")
+    for grp, n, detail in rows:
+        print(f"  {n:>4}   {grp}")
+        if detail and not args.brief:
+            for line in textwrap.wrap(str(detail), 68):
+                print(f"         {line}")
+    return 0
+
+
 def main(argv=None):
     parser = argparse.ArgumentParser(prog="cli.py", description=__doc__,
                                      formatter_class=argparse.RawDescriptionHelpFormatter)
@@ -543,6 +610,13 @@ def main(argv=None):
     p_judge.add_argument("--redo", action="store_true",
                          help="go through candidates that already have a verdict")
     p_judge.set_defaults(func=cmd_judge)
+
+    p_peak = sub.add_parser("peak", help="show the rows behind the top of a p04 ceiling")
+    p_peak.add_argument("dimension", help=", ".join(sorted(PEAKS)))
+    p_peak.add_argument("--db", default=str(DEFAULT_DB))
+    p_peak.add_argument("--top", type=int, default=5)
+    p_peak.add_argument("--brief", action="store_true", help="counts only, no detail")
+    p_peak.set_defaults(func=cmd_peak)
 
     p_run = sub.add_parser("run", help="run all probes, write candidates.json")
     p_run.add_argument("--out", default=f"runs/{date.today().isoformat()}")
