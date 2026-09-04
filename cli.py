@@ -198,6 +198,29 @@ def cmd_score(args):
     return score_run(Path(args.run_dir), ROOT / "key")
 
 
+def _label_map(path, db_path):
+    """Opaque override id to the raw label, read from the sidecar outside git.
+
+    The battery loads override labels as opaque ids so the rule vocabulary never
+    reaches a probe. Judging one is a different job: a person cannot say whether
+    an override is a rule without knowing what it was. The map is read here at
+    display time from the gitignored sidecar, and it never enters candidates.json.
+    """
+    candidates = []
+    if path:
+        candidates.append(Path(path))
+    else:
+        data = Path(db_path).parent / "data"
+        candidates.extend(sorted(data.glob("*.labelmap.json")))
+    for candidate_path in candidates:
+        if candidate_path.exists():
+            try:
+                return json.loads(candidate_path.read_text(encoding="utf-8")), candidate_path
+            except ValueError:
+                continue
+    return {}, None
+
+
 def _resolver(db_path):
     """Map a landing id to something a person can recognise.
 
@@ -277,6 +300,10 @@ def cmd_show(args):
     """
     run_dir = Path(args.run_dir)
     labels = _resolver(args.db)
+    overrides, map_path = _label_map(getattr(args, "labels", None), args.db)
+    labels.update(overrides)
+    if map_path:
+        print(f"override labels resolved from {map_path}\n")
     if not labels:
         print(f"note: {args.db} not found, so ids cannot be resolved to names. "
               f"Pass --db if the database is elsewhere.\n")
@@ -358,6 +385,15 @@ def _render(candidate, labels, base, examples, index, total):
         add(f"  {line}")
     add("")
     evidence = candidate.get("evidence") or {}
+    field = str(evidence.get("field") or "")
+    if field.startswith("ovr_"):
+        label = labels.get(field)
+        if label:
+            add(f"  the override is labelled: {label!r}")
+        else:
+            add(f"  no label found for {field}. Pass --labels with the path to the "
+                f"labelmap.json the loader wrote, or re-run load to write it.")
+        add("")
     if evidence:
         add("  evidence")
         scalars = {k: v for k, v in evidence.items() if not isinstance(v, list)}
@@ -440,6 +476,10 @@ def cmd_judge(args):
     """
     run_dir = Path(args.run_dir)
     labels = _resolver(args.db)
+    overrides, map_path = _label_map(args.labels, args.db)
+    labels.update(overrides)
+    if map_path:
+        print(f"override labels resolved from {map_path}")
     payload = json.loads((run_dir / "candidates.json").read_text(encoding="utf-8"))
     candidates = payload["candidates"]
     match_path = run_dir / "match.csv"
@@ -634,6 +674,58 @@ def cmd_day(args):
     return 0
 
 
+def cmd_override(args):
+    """Every change recorded under one override, with the jobs it touched.
+
+    A p08 candidate says an override was applied N times. Judging it needs the
+    label and the actual jobs, so both are resolved here from the database and
+    the gitignored label map. Nothing is written.
+    """
+    import duckdb
+
+    overrides, map_path = _label_map(args.labels, args.db)
+    field = args.field if args.field.startswith("ovr_") else f"ovr_{args.field}"
+    label = overrides.get(field)
+    print(f"{field}")
+    if label:
+        print(f"labelled: {label!r}" + (f"   from {map_path}" if map_path else ""))
+    else:
+        print("no label found. Pass --labels with the path to the labelmap.json.")
+    print()
+
+    con = duckdb.connect(str(args.db), read_only=True)
+    try:
+        rows = con.execute("""
+            SELECT c.changed_at, c.changed_by, c.entity_id,
+                   coalesce(w.work_type, 'untyped'), w.start_ts, w.customer_count,
+                   c.old_value, c.new_value
+            FROM changes c LEFT JOIN work w ON w.work_id = c.entity_id
+            WHERE c.field = ? ORDER BY c.changed_at, c.entity_id""", [field]).fetchall()
+    finally:
+        con.close()
+
+    if not rows:
+        print("no changes recorded under that field")
+        return 0
+
+    print(f"{len(rows)} change(s)\n")
+    for at, by, entity, wtype, start, guests, old, new in rows:
+        when = at.strftime("%a %Y-%m-%d") if at else "no timestamp"
+        job = start.strftime("%a %Y-%m-%d %H:%M") if start else "no start time"
+        lead = (start.date() - at.date()).days if (at and start) else None
+        print(f"  changed {when} by {by or 'unknown'}"
+              + (f", {lead} day(s) before the job" if lead is not None else ""))
+        print(f"    job: {wtype} on {job}"
+              + (f", {guests} guests" if guests is not None else ""))
+        url = _airtable_url(entity, args.base)
+        if url:
+            print(f"    {url}")
+        if old or new:
+            print(f"    {old!r} -> {new!r}")
+        print()
+    return 0
+
+
 def main(argv=None):
     parser = argparse.ArgumentParser(prog="cli.py", description=__doc__,
                                      formatter_class=argparse.RawDescriptionHelpFormatter)
@@ -657,6 +749,7 @@ def main(argv=None):
     p_show.add_argument("--base", default=os.environ.get("AIRTABLE_BASE", ""),
                         help="Airtable base id, to print a link to each record. "
                              "Defaults to $AIRTABLE_BASE.")
+    p_show.add_argument("--labels", help="path to the labelmap.json the loader wrote")
     p_show.add_argument("--examples", type=int, default=6,
                         help="example rows to print per candidate, default 6")
     p_show.add_argument("--todo", action="store_true",
@@ -667,10 +760,18 @@ def main(argv=None):
     p_judge.add_argument("run_dir")
     p_judge.add_argument("--db", default=str(DEFAULT_DB))
     p_judge.add_argument("--base", default=os.environ.get("AIRTABLE_BASE", ""))
+    p_judge.add_argument("--labels", help="path to the labelmap.json the loader wrote")
     p_judge.add_argument("--examples", type=int, default=6)
     p_judge.add_argument("--redo", action="store_true",
                          help="go through candidates that already have a verdict")
     p_judge.set_defaults(func=cmd_judge)
+
+    p_ovr = sub.add_parser("override", help="open one p08 override: its label and its jobs")
+    p_ovr.add_argument("field", help="ovr_xxxxxxxxxxxx, or just the hex part")
+    p_ovr.add_argument("--db", default=str(DEFAULT_DB))
+    p_ovr.add_argument("--base", default=os.environ.get("AIRTABLE_BASE", ""))
+    p_ovr.add_argument("--labels", help="path to the labelmap.json the loader wrote")
+    p_ovr.set_defaults(func=cmd_override)
 
     p_peak = sub.add_parser("peak", help="show the rows behind the top of a p04 ceiling")
     p_peak.add_argument("dimension", help=", ".join(sorted(PEAKS)))
