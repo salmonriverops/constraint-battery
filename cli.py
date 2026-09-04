@@ -578,6 +578,62 @@ def cmd_peak(args):
     return 0
 
 
+def cmd_day(args):
+    """Every job on one date, with who and what was on it.
+
+    The place a person lands when a candidate raises a question about a specific
+    day. Reads the database, resolves ids to names, links each job back to its
+    Airtable record. Writes nothing.
+    """
+    import duckdb
+
+    con = duckdb.connect(str(args.db), read_only=True)
+    try:
+        jobs = con.execute("""
+            SELECT w.work_id, coalesce(w.work_type, 'untyped') AS wtype,
+                   w.start_ts, w.end_ts, w.customer_count, w.status,
+                   coalesce(l.name, '') AS loc
+            FROM work w LEFT JOIN locations l ON l.location_id = w.location_id
+            WHERE cast(w.start_ts AS DATE) = cast(? AS DATE)
+            ORDER BY w.start_ts, w.work_id""", [args.date]).fetchall()
+        crew = {}
+        for wid, name, kind, role in con.execute("""
+                SELECT a.work_id, coalesce(r.name, a.resource_id),
+                       coalesce(r.kind, '?'), a.role
+                FROM assignments a LEFT JOIN resources r ON r.resource_id = a.resource_id
+                WHERE a.work_id IN (SELECT w.work_id FROM work w
+                                    WHERE cast(w.start_ts AS DATE) = cast(? AS DATE))
+                ORDER BY 2""", [args.date]).fetchall():
+            crew.setdefault(wid, []).append(f"{name} [{kind}] as {role}")
+    finally:
+        con.close()
+
+    if not jobs:
+        print(f"no jobs with a start time on {args.date}")
+        return 0
+
+    print(f"{len(jobs)} job(s) on {args.date}\n")
+    for wid, wtype, start, end, guests, status, loc in jobs:
+        when = start.strftime("%a %H:%M") if start else "no start"
+        until = end.strftime("%H:%M") if end else "?"
+        bits = [f"{guests} guests" if guests is not None else "no guest count"]
+        if status:
+            bits.append(str(status))
+        if loc:
+            bits.append(loc)
+        print(f"  {when} to {until}   {wtype}")
+        print(f"      {', '.join(bits)}")
+        url = _airtable_url(wid, args.base)
+        if url:
+            print(f"      {url}")
+        for line in crew.get(wid, []):
+            print(f"      - {line}")
+        if not crew.get(wid):
+            print("      - nobody assigned")
+        print()
+    return 0
+
+
 def main(argv=None):
     parser = argparse.ArgumentParser(prog="cli.py", description=__doc__,
                                      formatter_class=argparse.RawDescriptionHelpFormatter)
@@ -622,6 +678,12 @@ def main(argv=None):
     p_peak.add_argument("--top", type=int, default=5)
     p_peak.add_argument("--brief", action="store_true", help="counts only, no detail")
     p_peak.set_defaults(func=cmd_peak)
+
+    p_day = sub.add_parser("day", help="every job on one date, with crew and links")
+    p_day.add_argument("date", help="YYYY-MM-DD")
+    p_day.add_argument("--db", default=str(DEFAULT_DB))
+    p_day.add_argument("--base", default=os.environ.get("AIRTABLE_BASE", ""))
+    p_day.set_defaults(func=cmd_day)
 
     p_run = sub.add_parser("run", help="run all probes, write candidates.json")
     p_run.add_argument("--out", default=f"runs/{date.today().isoformat()}")
