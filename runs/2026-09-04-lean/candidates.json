@@ -1,0 +1,669 @@
+{
+  "profile": {
+    "profile": "lean",
+    "description": "What a typical operation would plausibly produce: transaction records for work, assignment records with times, and locations.",
+    "export_dir": "data/export",
+    "skipped_source_tables": [
+      "Movements",
+      "Rig Assignments"
+    ],
+    "emptied_tables": [
+      "location_travel",
+      "changes"
+    ],
+    "nulled_columns": {
+      "work": [
+        "location_id"
+      ],
+      "resources": [
+        "home_location_id"
+      ]
+    },
+    "collapsed_resource_kind": true
+  },
+  "guards": {
+    "min_assignments_per_resource": 20,
+    "min_instances_per_work_type": 10,
+    "min_populated_rows_per_field": 50,
+    "min_observations": 50,
+    "min_change_events": 3
+  },
+  "input_volumes": {
+    "work": 412,
+    "resources": 152,
+    "assignments": 315,
+    "locations": 35,
+    "location_travel": 0,
+    "changes": 0
+  },
+  "candidates": [
+    {
+      "probe": "p03",
+      "candidate_id": "p03-exclusivity-vehicle",
+      "proposed_type": "exclusivity",
+      "statement": "A vehicle is sometimes booked on two jobs whose times overlap. This happened 67 times across 5 of them. Is the overlap allowed, or are these mistakes?",
+      "evidence": {
+        "overlapping_pairs": 67,
+        "resources_with_an_overlap": 5,
+        "examples": [
+          {
+            "resource_id": "vh_rec4nC1LmBhnRXXEt",
+            "work_id_a": "op_reciJlhtwMfFSVdSO",
+            "work_id_b": "op_rec3SPsqlM3G172Al",
+            "a_start": "2026-06-13 16:00:00",
+            "a_end": "2026-06-13 23:00:00",
+            "b_start": "2026-06-13 20:00:00",
+            "b_end": "2026-06-13 22:30:00"
+          },
+          {
+            "resource_id": "vh_rec4nC1LmBhnRXXEt",
+            "work_id_a": "op_recUXpKrBMRWG6W2o",
+            "work_id_b": "op_recHrsuRUrEXnUp4u",
+            "a_start": "2026-06-15 20:00:00",
+            "a_end": "2026-06-15 22:30:00",
+            "b_start": "2026-06-15 15:00:00",
+            "b_end": "2026-06-15 22:00:00"
+          },
+          {
+            "resource_id": "vh_rec4nC1LmBhnRXXEt",
+            "work_id_a": "op_rechUckR0E41v4wbY",
+            "work_id_b": "op_recjZaBQV6EleEV5H",
+            "a_start": "2026-06-16 16:00:00",
+            "a_end": "2026-06-16 18:30:00",
+            "b_start": "2026-06-16 15:00:00",
+            "b_end": "2026-06-16 22:00:00"
+          },
+          {
+            "resource_id": "vh_rec4nC1LmBhnRXXEt",
+            "work_id_a": "op_recYoP4NVjf3wkR2c",
+            "work_id_b": "op_recMRE6M6E0cgGbnO",
+            "a_start": "2026-07-10 16:00:00",
+            "a_end": "2026-07-10 18:30:00",
+            "b_start": "2026-07-10 15:00:00",
+            "b_end": "2026-07-10 22:00:00"
+          },
+          {
+            "resource_id": "vh_rec7KtNpuQiP24SDT",
+            "work_id_a": "op_reciJlhtwMfFSVdSO",
+            "work_id_b": "op_rec3SPsqlM3G172Al",
+            "a_start": "2026-06-13 16:00:00",
+            "a_end": "2026-06-13 23:00:00",
+            "b_start": "2026-06-13 20:00:00",
+            "b_end": "2026-06-13 22:30:00"
+          },
+          {
+            "resource_id": "vh_rec7KtNpuQiP24SDT",
+            "work_id_a": "op_recHrsuRUrEXnUp4u",
+            "work_id_b": "op_recUXpKrBMRWG6W2o",
+            "a_start": "2026-06-15 15:00:00",
+            "a_end": "2026-06-15 22:00:00",
+            "b_start": "2026-06-15 20:00:00",
+            "b_end": "2026-06-15 22:30:00"
+          },
+          {
+            "resource_id": "vh_rec7KtNpuQiP24SDT",
+            "work_id_a": "op_recjZaBQV6EleEV5H",
+            "work_id_b": "op_rechUckR0E41v4wbY",
+            "a_start": "2026-06-16 15:00:00",
+            "a_end": "2026-06-16 22:00:00",
+            "b_start": "2026-06-16 16:00:00",
+            "b_end": "2026-06-16 18:30:00"
+          },
+          {
+            "resource_id": "vh_rec7KtNpuQiP24SDT",
+            "work_id_a": "op_reccTPLeQMTUILalN",
+            "work_id_b": "op_recOTfxjUMmXz9bd6",
+            "a_start": "2026-06-22 15:00:00",
+            "a_end": "2026-06-22 22:00:00",
+            "b_start": "2026-06-22 16:00:00",
+            "b_end": "2026-06-22 18:30:00"
+          },
+          {
+            "resource_id": "vh_rec7KtNpuQiP24SDT",
+            "work_id_a": "op_reccTPLeQMTUILalN",
+            "work_id_b": "op_recBJjvRDMzgsEW5S",
+            "a_start": "2026-06-22 15:00:00",
+            "a_end": "2026-06-22 22:00:00",
+            "b_start": "2026-06-22 20:00:00",
+            "b_end": "2026-06-22 22:30:00"
+          },
+          {
+            "resource_id": "vh_rec7KtNpuQiP24SDT",
+            "work_id_a": "op_recgj3fNmbDqJh8hL",
+            "work_id_b": "op_rec5eGbqMuDscYGjW",
+            "a_start": "2026-07-22 15:00:00",
+            "a_end": "2026-07-22 22:00:00",
+            "b_start": "2026-07-22 16:00:00",
+            "b_end": "2026-07-22 18:30:00"
+          }
+        ]
+      },
+      "confidence_inputs": {
+        "kind": "vehicle",
+        "assignments_considered": 244,
+        "resources_over_assignment_floor": 5,
+        "resources_of_this_kind": 13,
+        "min_assignments_per_resource": 20
+      }
+    },
+    {
+      "probe": "p03",
+      "candidate_id": "p03-turnaround-vehicle",
+      "proposed_type": "turnaround",
+      "statement": "After a vehicle finishes a job, at least 30 minutes always passes before it starts the next one. Across 193 consecutive pairs there is not one exception. Is 30 minutes a required turnaround?",
+      "evidence": {
+        "proposed_minimum_minutes": 30,
+        "floor": "hard",
+        "gaps_below_the_edge": 0,
+        "bin_minutes": 5,
+        "tail_fraction": 0.01,
+        "histogram_head": [
+          [
+            0,
+            0
+          ],
+          [
+            5,
+            0
+          ],
+          [
+            10,
+            0
+          ],
+          [
+            15,
+            0
+          ],
+          [
+            20,
+            0
+          ],
+          [
+            25,
+            0
+          ],
+          [
+            30,
+            2
+          ],
+          [
+            35,
+            0
+          ],
+          [
+            40,
+            0
+          ],
+          [
+            45,
+            0
+          ],
+          [
+            50,
+            0
+          ],
+          [
+            55,
+            0
+          ],
+          [
+            60,
+            2
+          ],
+          [
+            65,
+            0
+          ],
+          [
+            70,
+            0
+          ],
+          [
+            75,
+            0
+          ],
+          [
+            80,
+            0
+          ],
+          [
+            85,
+            0
+          ],
+          [
+            90,
+            40
+          ],
+          [
+            95,
+            0
+          ],
+          [
+            100,
+            0
+          ],
+          [
+            105,
+            0
+          ],
+          [
+            110,
+            0
+          ],
+          [
+            115,
+            0
+          ]
+        ],
+        "observed_min_gap": 30,
+        "observed_median_gap": 1290
+      },
+      "confidence_inputs": {
+        "kind": "vehicle",
+        "consecutive_pairs": 193,
+        "resources_contributing": 5,
+        "min_assignments_per_resource": 20
+      }
+    },
+    {
+      "probe": "p04",
+      "candidate_id": "p04-ceiling-customers-per-work",
+      "proposed_type": "capacity",
+      "statement": "The number of guests on one job tops out at 127, but only 1 times out of 412, and the numbers just below it thin out gradually. Is 127 a limit, or just the busiest it ever got?",
+      "evidence": {
+        "dimension": "customers_per_work",
+        "observed_max": 127,
+        "shape": "taper",
+        "count_at_max": 1,
+        "count_one_below_max": 0,
+        "share_at_max": 0.0024,
+        "max_over_busiest_value": 0.0233,
+        "cliff_ratio_used": 0.5,
+        "distribution": [
+          {
+            "value": 0,
+            "count": 42
+          },
+          {
+            "value": 1,
+            "count": 26
+          },
+          {
+            "value": 2,
+            "count": 43
+          },
+          {
+            "value": 3,
+            "count": 13
+          },
+          {
+            "value": 4,
+            "count": 28
+          },
+          {
+            "value": 5,
+            "count": 13
+          },
+          {
+            "value": 6,
+            "count": 28
+          },
+          {
+            "value": 7,
+            "count": 15
+          },
+          {
+            "value": 8,
+            "count": 17
+          },
+          {
+            "value": 9,
+            "count": 12
+          },
+          {
+            "value": 10,
+            "count": 16
+          },
+          {
+            "value": 11,
+            "count": 7
+          },
+          {
+            "value": 12,
+            "count": 12
+          },
+          {
+            "value": 13,
+            "count": 5
+          },
+          {
+            "value": 14,
+            "count": 7
+          },
+          {
+            "value": 15,
+            "count": 11
+          },
+          {
+            "value": 16,
+            "count": 5
+          },
+          {
+            "value": 17,
+            "count": 7
+          },
+          {
+            "value": 18,
+            "count": 5
+          },
+          {
+            "value": 19,
+            "count": 4
+          },
+          {
+            "value": 20,
+            "count": 5
+          },
+          {
+            "value": 21,
+            "count": 3
+          },
+          {
+            "value": 22,
+            "count": 7
+          },
+          {
+            "value": 23,
+            "count": 8
+          },
+          {
+            "value": 24,
+            "count": 12
+          },
+          {
+            "value": 25,
+            "count": 7
+          },
+          {
+            "value": 26,
+            "count": 2
+          },
+          {
+            "value": 27,
+            "count": 3
+          },
+          {
+            "value": 28,
+            "count": 1
+          },
+          {
+            "value": 29,
+            "count": 2
+          },
+          {
+            "value": 30,
+            "count": 4
+          },
+          {
+            "value": 31,
+            "count": 2
+          },
+          {
+            "value": 32,
+            "count": 1
+          },
+          {
+            "value": 33,
+            "count": 2
+          },
+          {
+            "value": 34,
+            "count": 3
+          },
+          {
+            "value": 35,
+            "count": 2
+          },
+          {
+            "value": 36,
+            "count": 1
+          },
+          {
+            "value": 37,
+            "count": 3
+          },
+          {
+            "value": 38,
+            "count": 1
+          },
+          {
+            "value": 39,
+            "count": 1
+          },
+          {
+            "value": 40,
+            "count": 4
+          },
+          {
+            "value": 41,
+            "count": 3
+          },
+          {
+            "value": 45,
+            "count": 1
+          },
+          {
+            "value": 46,
+            "count": 4
+          },
+          {
+            "value": 50,
+            "count": 2
+          },
+          {
+            "value": 54,
+            "count": 1
+          },
+          {
+            "value": 55,
+            "count": 1
+          },
+          {
+            "value": 58,
+            "count": 1
+          },
+          {
+            "value": 60,
+            "count": 1
+          },
+          {
+            "value": 61,
+            "count": 1
+          },
+          {
+            "value": 66,
+            "count": 1
+          },
+          {
+            "value": 69,
+            "count": 1
+          },
+          {
+            "value": 71,
+            "count": 1
+          },
+          {
+            "value": 77,
+            "count": 1
+          },
+          {
+            "value": 96,
+            "count": 1
+          },
+          {
+            "value": 105,
+            "count": 1
+          },
+          {
+            "value": 127,
+            "count": 1
+          }
+        ]
+      },
+      "confidence_inputs": {
+        "observations": 412,
+        "distinct_values": 57,
+        "min_observations": 50
+      }
+    },
+    {
+      "probe": "p04",
+      "candidate_id": "p04-ceiling-resources-per-work",
+      "proposed_type": "capacity",
+      "statement": "The number of resources assigned to one job tops out at 6, but only 1 times out of 133, and the numbers just below it thin out gradually. Is 6 a limit, or just the busiest it ever got?",
+      "evidence": {
+        "dimension": "resources_per_work",
+        "observed_max": 6,
+        "shape": "taper",
+        "count_at_max": 1,
+        "count_one_below_max": 1,
+        "share_at_max": 0.0075,
+        "max_over_busiest_value": 0.0111,
+        "cliff_ratio_used": 0.5,
+        "distribution": [
+          {
+            "value": 1,
+            "count": 1
+          },
+          {
+            "value": 2,
+            "count": 90
+          },
+          {
+            "value": 3,
+            "count": 37
+          },
+          {
+            "value": 4,
+            "count": 3
+          },
+          {
+            "value": 5,
+            "count": 1
+          },
+          {
+            "value": 6,
+            "count": 1
+          }
+        ]
+      },
+      "confidence_inputs": {
+        "observations": 133,
+        "distinct_values": 6,
+        "min_observations": 50
+      }
+    },
+    {
+      "probe": "p04",
+      "candidate_id": "p04-ceiling-work-per-day",
+      "proposed_type": "capacity",
+      "statement": "The number of jobs on one day tops out at 13, but only 1 times out of 115, and the numbers just below it thin out gradually. Is 13 a limit, or just the busiest it ever got?",
+      "evidence": {
+        "dimension": "work_per_day",
+        "observed_max": 13,
+        "shape": "taper",
+        "count_at_max": 1,
+        "count_one_below_max": 0,
+        "share_at_max": 0.0087,
+        "max_over_busiest_value": 0.0294,
+        "cliff_ratio_used": 0.5,
+        "distribution": [
+          {
+            "value": 1,
+            "count": 34
+          },
+          {
+            "value": 2,
+            "count": 19
+          },
+          {
+            "value": 3,
+            "count": 12
+          },
+          {
+            "value": 4,
+            "count": 10
+          },
+          {
+            "value": 5,
+            "count": 13
+          },
+          {
+            "value": 6,
+            "count": 10
+          },
+          {
+            "value": 7,
+            "count": 8
+          },
+          {
+            "value": 8,
+            "count": 4
+          },
+          {
+            "value": 9,
+            "count": 3
+          },
+          {
+            "value": 10,
+            "count": 1
+          },
+          {
+            "value": 13,
+            "count": 1
+          }
+        ]
+      },
+      "confidence_inputs": {
+        "observations": 115,
+        "distinct_values": 11,
+        "min_observations": 50
+      }
+    },
+    {
+      "probe": "p04",
+      "candidate_id": "p04-ceiling-work-per-resource-per-day",
+      "proposed_type": "capacity",
+      "statement": "The number of jobs for one resource on one day tops out at 3, but only 26 times out of 219, and the numbers just below it thin out gradually. Is 3 a limit, or just the busiest it ever got?",
+      "evidence": {
+        "dimension": "work_per_resource_per_day",
+        "observed_max": 3,
+        "shape": "taper",
+        "count_at_max": 26,
+        "count_one_below_max": 44,
+        "share_at_max": 0.1187,
+        "max_over_busiest_value": 0.1745,
+        "cliff_ratio_used": 0.5,
+        "distribution": [
+          {
+            "value": 1,
+            "count": 149
+          },
+          {
+            "value": 2,
+            "count": 44
+          },
+          {
+            "value": 3,
+            "count": 26
+          }
+        ]
+      },
+      "confidence_inputs": {
+        "observations": 219,
+        "distinct_values": 3,
+        "min_observations": 50
+      }
+    }
+  ]
+}
