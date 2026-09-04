@@ -322,42 +322,10 @@ def cmd_show(args):
     if args.todo:
         candidates = remaining
 
-    width = 78
     for index, candidate in enumerate(candidates, 1):
         cid = candidate["candidate_id"]
-        print("=" * width)
-        print(f"[{index} of {len(candidates)}]  {cid}   probe {candidate['probe']}   "
-              f"proposed type: {candidate['proposed_type']}")
-        print("=" * width)
-        print()
-        for line in textwrap.wrap(candidate["statement"], width):
-            print(f"  {line}")
-        print()
-        evidence = candidate.get("evidence") or {}
-        if evidence:
-            print("  evidence")
-            # Scalars first, they are the counts that make a candidate worth reading.
-            # Example rows go last and are capped, because the point of an example is
-            # to be checkable in the base, not exhaustive.
-            scalars = {k: v for k, v in evidence.items() if not isinstance(v, list)}
-            listy = {k: v for k, v in evidence.items() if isinstance(v, list)}
-            for key in sorted(scalars):
-                print(f"    {key}: {scalars[key]}")
-            for key in sorted(listy):
-                values = listy[key]
-                shown = values[:args.examples]
-                print(f"    {key}: {len(values)}")
-                for item in shown:
-                    if isinstance(item, dict):
-                        print("      -")
-                        for k, v in item.items():
-                            print(f"          {k}: {_describe(v, labels, args.base)}")
-                    else:
-                        print(f"      - {_describe(item, labels, args.base)}")
-                if len(values) > len(shown):
-                    print(f"      ... and {len(values) - len(shown)} more, "
-                          f"see candidates.json")
-            print()
+        print("\n".join(_render(candidate, labels, args.base, args.examples,
+                                index, len(candidates))))
         if cid in done:
             for row in done[cid]:
                 print(f"  already recorded: {row['verdict']} {row.get('key_id') or ''}")
