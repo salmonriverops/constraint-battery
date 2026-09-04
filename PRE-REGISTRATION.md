@@ -163,3 +163,30 @@ Nothing in the base links a trip to the boats that ran it. The 60 boats in
 is unrecoverable from this export by construction rather than by any failure
 of a probe. This is recorded before scoring so it cannot be offered afterwards
 as an excuse for a number.
+
+---
+
+## A corrected verdict, 2026-09-04, after scoring
+
+`p04-ceiling-customers-per-work` was judged NEW in the full run and MATCH
+against K012 in the lean run. It is the same candidate with the same statement
+in both, so the two verdicts cannot both stand. This was the only inconsistency
+between the two sets of verdicts, and it was the sole reason K012 appeared in
+the delta as recovered in the leaner run only.
+
+Resolved to MATCH K012 in both runs. The reasoning, recorded by the operator:
+127 guests on one job is the busiest figure observed, not a cap, and the
+candidate is pointing at the same limit K012 states rather than at a new one.
+
+Effect on the reported numbers. The full run's operating recall moves from 5 of
+63 to 6 of 63, and its novelty from 19 to 18. Precision is unchanged at 23 of
+29, because MATCH and NEW both count as a correct candidate. The lean run is
+unchanged. The correction raises the headline recall, which is worth stating
+plainly: it went in the flattering direction, and it was made because the two
+runs disagreed with each other rather than because the number was low.
+
+The key was not touched. It remains frozen at `8ab6bedd`. The operator's
+revised understanding of the 120 limit, that it applies to French Creek and
+SRHAB volume while other day trips may run the same day and the realistic total
+is nearer 140, is recorded in `FINDINGS.md` and deliberately not written back
+into the key.

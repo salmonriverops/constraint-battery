@@ -78,7 +78,7 @@ to ask. It is not a method for producing answers unaided.
 
 | Rule as now understood | Conditions | From | Status |
 | --- | --- | --- | --- |
-| The stated combined day volume of 120 looks low. | French Creek and SRHAB alone run near 120, and other day trips run at the same time. Realistic total is nearer 140. Highest single record observed is 127. It gets tight but it works. | p04-ceiling-customers-per-work | needs checking against seats, PFDs and guide count before adopting |
+| K012 as stated is the right rule but scoped wrongly. The 120 applies to French Creek and SRHAB operation volume, not to a combined all-sites total. | Other day trips may run on the same date alongside it, within limits. Total French Creek volume may push toward about 140. The highest single record observed is 127, which is the busiest day seen and not a cap. | p04-ceiling-customers-per-work | needs checking against seats, PFDs and guide count before adopting. Do not edit K012 in the key, it is frozen evidence |
 | Hagerman runs tighter turnarounds than elsewhere. | The 10:00 and 14:00 launch pair works there. | p03-turnaround-person, lean run | not yet written into the SOPs |
 
 ## Instrumentation gaps
