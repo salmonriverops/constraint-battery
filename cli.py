@@ -323,6 +323,158 @@ def cmd_show(args):
     return 0
 
 
+def _render(candidate, labels, base, examples, index, total):
+    """One candidate, printed for a person to read. Shared by show and judge."""
+    lines = []
+    add = lines.append
+    width = 78
+    cid = candidate["candidate_id"]
+    add("=" * width)
+    add(f"[{index} of {total}]  {cid}   probe {candidate['probe']}   "
+        f"proposed type: {candidate['proposed_type']}")
+    add("=" * width)
+    add("")
+    for line in textwrap.wrap(candidate["statement"], width):
+        add(f"  {line}")
+    add("")
+    evidence = candidate.get("evidence") or {}
+    if evidence:
+        add("  evidence")
+        scalars = {k: v for k, v in evidence.items() if not isinstance(v, list)}
+        listy = {k: v for k, v in evidence.items() if isinstance(v, list)}
+        for key in sorted(scalars):
+            add(f"    {key}: {scalars[key]}")
+        for key in sorted(listy):
+            values = listy[key]
+            shown = values[:examples]
+            add(f"    {key}: {len(values)}")
+            for item in shown:
+                if isinstance(item, dict):
+                    add("      -")
+                    for k, v in item.items():
+                        add(f"          {k}: {_describe(v, labels, base)}")
+                else:
+                    add(f"      - {_describe(item, labels, base)}")
+            if len(values) > len(shown):
+                add(f"      ... and {len(values) - len(shown)} more, see candidates.json")
+        add("")
+    return lines
+
+
+def _read_match(match_path):
+    """Existing verdicts, keyed by candidate id. One candidate can hold several rows."""
+    recorded = {}
+    if not match_path.exists():
+        return recorded
+    with match_path.open(newline="", encoding="utf-8") as fh:
+        for row in csv.DictReader(fh):
+            if (row.get("verdict") or "").strip():
+                recorded.setdefault(row["candidate_id"], []).append(row)
+    return recorded
+
+
+def _write_match(match_path, candidates, recorded):
+    """Rewrite match.csv in candidate order, quoting whatever the notes contain."""
+    with match_path.open("w", newline="", encoding="utf-8") as fh:
+        writer = csv.DictWriter(fh, fieldnames=["candidate_id", "key_id", "verdict", "note"])
+        writer.writeheader()
+        for candidate in candidates:
+            cid = candidate["candidate_id"]
+            rows = recorded.get(cid)
+            if not rows:
+                writer.writerow({"candidate_id": cid, "key_id": "", "verdict": "", "note": ""})
+                continue
+            for row in rows:
+                writer.writerow({"candidate_id": cid, "key_id": row.get("key_id", ""),
+                                 "verdict": row.get("verdict", ""),
+                                 "note": row.get("note", "")})
+
+
+def _prompt_note():
+    """Read a note that may run to many lines. Blank line ends it.
+
+    Dictation produces long unbroken text with commas and quotes in it, which is
+    miserable to type into a spreadsheet cell and easy to corrupt. Taking it here and
+    writing it through the csv module means the file stays valid whatever is said.
+    """
+    print("  note, as long as you like. Blank line when done:")
+    lines = []
+    while True:
+        try:
+            line = input("  > ")
+        except EOFError:
+            break
+        if not line.strip():
+            break
+        lines.append(line.strip())
+    return " ".join(lines)
+
+
+def cmd_judge(args):
+    """Record verdicts one candidate at a time.
+
+    This is data entry, not matching. It shows a candidate, asks what the person
+    decided, and writes it down. It proposes nothing, ranks nothing, suggests no key
+    row, and never reads key/. The judgement is the operator's and this only saves
+    them from hand editing a CSV while dictating.
+    """
+    run_dir = Path(args.run_dir)
+    labels = _resolver(args.db)
+    payload = json.loads((run_dir / "candidates.json").read_text(encoding="utf-8"))
+    candidates = payload["candidates"]
+    match_path = run_dir / "match.csv"
+    recorded = _read_match(match_path)
+
+    queue = [c for c in candidates if args.redo or c["candidate_id"] not in recorded]
+    if not queue:
+        print(f"every candidate in {match_path} already has a verdict. "
+              f"Use --redo to go through them again.")
+        return 0
+
+    print(f"{len(queue)} candidate(s) to judge. Ctrl-C or q at any prompt stops and "
+          f"keeps what you have done.\n")
+
+    for position, candidate in enumerate(queue, 1):
+        cid = candidate["candidate_id"]
+        print("\n".join(_render(candidate, labels, args.base, args.examples,
+                                position, len(queue))))
+        try:
+            verdict = ""
+            while verdict not in ("MATCH", "NEW", "FALSE"):
+                answer = input("  verdict  [m]atch  [n]ew  [f]alse  [s]kip  [q]uit: ")
+                answer = answer.strip().lower()
+                if answer in ("q", "quit"):
+                    print(f"\nstopped. {match_path} holds everything judged so far.")
+                    return 0
+                if answer in ("s", "skip", ""):
+                    verdict = None
+                    break
+                verdict = {"m": "MATCH", "n": "NEW", "f": "FALSE"}.get(answer[:1], "")
+                if not verdict:
+                    print("  m, n, f, s or q.")
+            if verdict is None:
+                continue
+
+            key_ids = [""]
+            if verdict == "MATCH":
+                raw = input("  key id(s), comma separated if it covers several: ")
+                key_ids = [k.strip().upper() for k in raw.split(",") if k.strip()] or [""]
+
+            note = _prompt_note()
+        except (KeyboardInterrupt, EOFError):
+            print(f"\n\nstopped. {match_path} holds everything judged so far.")
+            return 0
+
+        recorded[cid] = [{"key_id": key_id, "verdict": verdict, "note": note}
+                         for key_id in key_ids]
+        _write_match(match_path, candidates, recorded)
+        print(f"  recorded {verdict} {' '.join(k for k in key_ids if k)}".rstrip())
+
+    done = sum(1 for c in candidates if c["candidate_id"] in recorded)
+    print(f"\n{done} of {len(candidates)} candidates judged in {match_path}")
+    return 0
+
+
 def main(argv=None):
     parser = argparse.ArgumentParser(prog="cli.py", description=__doc__,
                                      formatter_class=argparse.RawDescriptionHelpFormatter)
@@ -351,6 +503,15 @@ def main(argv=None):
     p_show.add_argument("--todo", action="store_true",
                         help="only the candidates with no verdict yet in match.csv")
     p_show.set_defaults(func=cmd_show)
+
+    p_judge = sub.add_parser("judge", help="record verdicts one candidate at a time")
+    p_judge.add_argument("run_dir")
+    p_judge.add_argument("--db", default=str(DEFAULT_DB))
+    p_judge.add_argument("--base", default=os.environ.get("AIRTABLE_BASE", ""))
+    p_judge.add_argument("--examples", type=int, default=3)
+    p_judge.add_argument("--redo", action="store_true",
+                         help="go through candidates that already have a verdict")
+    p_judge.set_defaults(func=cmd_judge)
 
     p_run = sub.add_parser("run", help="run all probes, write candidates.json")
     p_run.add_argument("--out", default=f"runs/{date.today().isoformat()}")
