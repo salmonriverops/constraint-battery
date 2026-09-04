@@ -676,6 +676,49 @@ def cmd_override(args):
         print("no changes recorded under that field")
         return 0
 
+    con = duckdb.connect(str(args.db), read_only=True)
+    try:
+        crew = {}
+        for wid, name, kind in con.execute("""
+                SELECT a.work_id, coalesce(r.name, a.resource_id), coalesce(r.kind, '?')
+                FROM assignments a LEFT JOIN resources r ON r.resource_id = a.resource_id
+                WHERE a.work_id IN (SELECT entity_id FROM changes WHERE field = ?)
+                ORDER BY 3, 2""", [field]).fetchall():
+            crew.setdefault(wid, []).append((name, kind))
+
+        # Does a kind of resource show up on these jobs more than on jobs generally?
+        # That is what turns a hunch about what an override means into something
+        # checkable. It is a rate, not a cause: the export carries no field history,
+        # so it cannot say whether the resource was added before or after the change.
+        touched = con.execute(
+            "SELECT count(DISTINCT entity_id) FROM changes WHERE field = ?",
+            [field]).fetchone()[0]
+        all_work = con.execute(
+            "SELECT count(*) FROM work WHERE work_id IN (SELECT work_id FROM assignments)"
+        ).fetchone()[0]
+        here = dict(con.execute("""
+            SELECT coalesce(r.kind, '?'), count(DISTINCT a.work_id)
+            FROM assignments a LEFT JOIN resources r ON r.resource_id = a.resource_id
+            WHERE a.work_id IN (SELECT entity_id FROM changes WHERE field = ?)
+            GROUP BY 1""", [field]).fetchall())
+        overall = dict(con.execute("""
+            SELECT coalesce(r.kind, '?'), count(DISTINCT a.work_id)
+            FROM assignments a LEFT JOIN resources r ON r.resource_id = a.resource_id
+            GROUP BY 1""").fetchall())
+    finally:
+        con.close()
+
+    if here and touched and all_work:
+        print(f"resource kinds on the {touched} job(s) this override touched, "
+              f"against all {all_work} jobs that have any resource\n")
+        print(f"    {'kind':<16}{'here':>10}{'everywhere':>14}")
+        for kind in sorted(here, key=lambda k: -here[k]):
+            a = here[kind] / touched
+            b = overall.get(kind, 0) / all_work
+            flag = "  <-- much more common here" if a >= 2 * b and a >= 0.5 else ""
+            print(f"    {kind:<16}{a:>9.0%}{b:>14.0%}{flag}")
+        print()
+
     print(f"{len(rows)} change(s)\n")
     for at, by, entity, wtype, start, guests, old, new in rows:
         when = at.strftime("%a %Y-%m-%d") if at else "no timestamp"
@@ -690,6 +733,8 @@ def cmd_override(args):
             print(f"    {url}")
         if old or new:
             print(f"    {old!r} -> {new!r}")
+        for name, kind in crew.get(entity, []):
+            print(f"    - {name} [{kind}]")
         print()
     return 0
 
