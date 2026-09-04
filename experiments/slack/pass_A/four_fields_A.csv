@@ -1,0 +1,68 @@
+event_id,entity_recoverable,rule_recoverable,rule_ref,actor_recoverable,lead_time_recoverable,confidence,recurring_kind
+EA001,1,1,capacity/vehicle; S016,1,1,high,vehicle/capacity shortfall worked around
+EA002,1,1,vehicle capacity; S013,1,1,high,vehicle/capacity shortfall worked around
+EA003,1,1,K005 / S025,1,1,high,vehicle/capacity shortfall worked around
+EA004,1,0,gear inventory (no written rule),1,1,high,gear shortfall accepted
+EA005,1,1,S016,1,1,low,decision visible but outcome not stated
+EA006,1,0,vehicle safety (no written rule),1,0,medium,"vehicle fault, restricted use accepted"
+EA007,1,1,S028 bus driver dependency,1,1,low,decision visible but outcome not stated
+EA008,1,1,capacity per slot; S017,1,1,high,capacity limit stretched
+EA009,1,1,K015,0,1,medium,capacity limit stretched
+EA010,1,1,staffing,1,1,high,owner/manager fills a guide or driver slot
+EA011,1,1,K009/K033,1,1,medium,trip added beyond the daily pattern
+EA012,1,1,S012,1,1,high,vehicle/capacity shortfall worked around
+EA013,1,1,S034; K009 (off-slot start),1,1,high,eligibility enforced / trip added beyond the daily pattern
+EA014,1,1,S028,1,1,low,decision visible but outcome not stated
+EA015,1,1,K020 / staffing,1,1,high,owner/manager fills a guide or driver slot
+EA016,1,1,S036 / K014,0,1,medium,"eligibility question raised, outcome unclear"
+EA017,0,1,S004,1,0,medium,"eligibility question raised, outcome unclear"
+EA018,1,1,staffing / K020,1,1,high,owner/manager fills a guide or driver slot
+EA019,1,1,S011,1,1,high,gear shortfall accepted
+EA020,1,0,custom itinerary (no written rule),1,1,high,itinerary changed at guest request
+EA021,1,1,S028 / S016,1,1,high,vehicle/capacity shortfall worked around
+EA022,1,0,safety practice (no written rule),1,0,high,"safety incident, guidance issued"
+EA023,0,1,K026 perimeter/bow line,0,0,low,decision visible but outcome not stated
+EA024,1,1,S035,1,1,high,eligibility exception granted
+EA025,1,1,S038,1,1,high,guest-service gap accepted
+EA026,1,1,S010,1,1,high,gear shortfall accepted
+EA027,1,0,gear inventory (no written rule),1,1,high,gear shortfall accepted
+EA028,1,1,S017 staffing,0,1,low,decision visible but outcome not stated
+EA029,1,1,S006,1,1,high,"vehicle fault, restricted use accepted"
+EA030,1,1,staffing / shuttle,1,1,high,owner/manager fills a guide or driver slot
+EA031,1,1,S002,1,1,high,eligibility enforced
+EA032,1,1,S040,1,1,high,pricing exception granted
+EA033,1,1,K015,1,1,high,"late booking growth, crew added"
+EA034,1,1,S027,0,1,medium,decision visible but outcome not stated
+EA035,1,1,S040 (pricing),1,1,high,pricing exception granted
+EA036,1,1,shuttle staffing,1,1,high,owner/manager fills a guide or driver slot
+EA037,1,1,S009,1,0,high,"vehicle fault, restricted use accepted"
+EA038,1,1,S008,1,0,high,"vehicle fault, restricted use accepted"
+EA039,1,1,S043,1,0,medium,approved time off honoured despite shortage
+EA040,1,1,K015,1,1,high,capacity limit stretched
+EA041,1,1,S017,0,1,medium,decision visible but outcome not stated
+EA042,1,0,rendezvous (no written rule),0,1,medium,guest rendezvous problem
+EA043,1,0,booking channel (no written rule),1,1,high,booking-system artefact caused ops work
+EA044,1,1,S032,1,1,high,staffing gap filled from standby
+EA045,1,1,S020,1,1,high,human override of shuttle timing
+EA046,1,1,K021,1,1,medium,store hours flexed
+EA047,1,0,minimum trip size (no written rule),0,1,low,decision visible but outcome not stated
+EA048,1,0,rental pickup (no written rule),1,1,medium,default plan adopted under missing information
+EA049,1,0,conduct (no written rule),1,0,medium,"conduct issue raised, action deferred"
+EA050,1,1,SA051,1,1,high,dispatch gap filled at the last minute
+EA051,1,1,SA051,1,1,high,automation false alarm dismissed
+EA052,1,1,SA052,1,1,medium,automation limit worked around by hand [human messages were visible in H; missed there]
+EA053,1,1,SA052,1,1,medium,automation limit worked around by hand
+EA054,1,0,rendezvous (no written rule),0,1,low,guest rendezvous problem
+EA055,1,1,SA058,0,1,medium,confirmation chased the night before
+EA056,1,1,S024 / SA058,1,1,high,vehicle/capacity shortfall worked around
+EA057,1,1,SA059,0,1,medium,default plan adopted under missing information
+EA058,1,0,fire/safety (no written rule),0,0,low,decision visible but outcome not stated
+EA059,1,1,SA053,0,1,low,decision visible but outcome not stated
+EA060,1,1,SA053 / S006,1,1,high,"vehicle fault, restricted use accepted"
+EA061,1,1,SA053,1,1,medium,vehicle fault checked and cleared
+EA062,1,1,SA053,0,1,low,decision visible but outcome not stated
+EA063,1,1,SA053,1,1,medium,"vehicle fault, restricted use accepted"
+EA064,1,1,SA054,0,1,low,decision visible but outcome not stated
+EA065,1,1,SA055,0,1,medium,deposit rule waived
+EA066,1,1,SA055,1,1,high,deposit rule waived
+EA067,1,1,SA050 / S005,1,1,medium,waiver gap accepted routinely

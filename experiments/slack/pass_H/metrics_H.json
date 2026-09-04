@@ -1,0 +1,15 @@
+{
+ "pass_": "H",
+ "messages_total": 673,
+ "messages_operational": 544,
+ "excluded": 531,
+ "constraint_rows": 48,
+ "override_events": 49,
+ "high": 31,
+ "rate_high_per_100": 5.7,
+ "rate_all_per_100": 9.0,
+ "entity": 96,
+ "rule": 80,
+ "actor": 84,
+ "lead": 84
+}

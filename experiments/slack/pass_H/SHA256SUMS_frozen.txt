@@ -1,0 +1,22 @@
+77fa14bd8564e4bfa64cd394cc1f14d5ea7999cd72f26d9093a5f4b9699c8ae4  pass_H/REPORT_H.md
+07f991a2e688985a4ea44fcd71eb9239128fe088d3ead901e84bc306b08f7e11  pass_H/constraints_H.csv
+17177310335bc38dad263a51304eaa041cc7211360ccb37d3da5f2158eaaf5da  pass_H/four_fields_H.csv
+fd98bfa36b631d6f5d13dfdc29a8c60ee015a601bdf6c94396bcefc193cf2338  pass_H/metrics_H.json
+c4411da8f1d94dbc4f2156bba944c84dc409bce4d83a829a755d73d05f051b86  pass_H/override_events_H.csv
+7d149844e2f95aee81800277589ea4a7bbaf5ff767cb687beffb85f961627044  pass_H/recurring_types_H.csv
+517d8d241cf90f86611651ef5f924af71dcad42070a4ff8df5812102116fda34  pass_H/volume_table.md
+3ec6a8d7bd81d81051ea3909a21ad1822077ab72927f0b8c01d53ac095fac80b  pass_H/volume_table.md
+# volume_table.md re-hashed after a name-only redaction of one channel label (20:42Z); no analysis content changed
+77c32f39af366a665c9466c288642eb3ffacb6c5325c5383783c8e8482c2d9f9  pass_H/REPORT_H.md
+# REPORT_H.md re-hashed after correcting one lead-time bucket count (16/13 -> 17/12) found in verification; events and CSVs unchanged
+667b4da32767c3834daff9566d43ca9171de28547a4f4948a793eb5ec81563cf  pass_H/REPORT_H.md
+ce5b01eb12b023869c9841884615c1fb470ce59f0e793021a32a302901b4c897  pass_H/volume_table.md
+# Both re-hashed on 2026-09-04 for the publication redaction pass, at the operator's
+# instruction and after both passes were complete. Removals only, all of them names or
+# specifics that identify a vehicle, a client group, a guest or a person: the vehicle
+# names behind the "vehicle fault, restricted use accepted" count, the head counts behind
+# the "capacity limit stretched" count, the site and outcome framing of one open
+# eligibility question, and two social channel labels plus one client group name in the
+# volume table. No count, rate, event, constraint row or conclusion changed. The
+# pre-redaction hashes above are the frozen originals; the withheld CSVs are unchanged
+# and their frozen hashes stand.
