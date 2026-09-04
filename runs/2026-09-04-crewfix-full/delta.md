@@ -18,9 +18,9 @@
 
 | Measure | Richer | Leaner | Change |
 | --- | --- | --- | --- |
-| Recall | 8% | 2% | -6 points |
+| Recall | 10% | 2% | -8 points |
 | Precision | 79% | 50% | -29 points |
-| Novelty | 19 | 3 | -16 |
+| Novelty | 18 | 3 | -15 |
 | Candidates | 29 | 8 | -21 |
 
 ## Input volumes
@@ -48,7 +48,7 @@
 | Type | Richer | Leaner | Survives |
 | --- | --- | --- | --- |
 | availability | 0/3 | 0/3 | neither run found it |
-| capacity | 0/18 | 1/18 | only in the leaner run |
+| capacity | 1/18 | 1/18 | yes |
 | compliance | 0/3 | 0/3 | neither run found it |
 | driver | 0/3 | 0/3 | neither run found it |
 | eligibility | 2/6 | 0/6 | **no, lost entirely** |
@@ -68,7 +68,7 @@
 | --- | --- | --- | --- |
 | airtable | 0/6 | 0/6 | neither run found it |
 | code | 4/29 | 0/29 | **no, lost entirely** |
-| head | 2/35 | 1/35 | **partly, 1 lost** |
+| head | 3/35 | 1/35 | **partly, 2 lost** |
 | rafting checklists.xlsx | 0/4 | 0/4 | neither run found it |
 
 ## Recovered in the richer run, lost in the leaner one
@@ -87,13 +87,6 @@ This is the deliverable for the next client. Each line names something the batte
   - found by: p08-override-work-ovr-384927112582
 - **K069** (vehicle) Two jobs on the same rig are clear if the gap between their time windows is at least 60 minutes; a smaller gap with no overlap is a soft tight-turnaround flag; real overlap is hard.
   - found by: p08-override-work-ovr-208d44cad2d2
-
-## Recovered in the leaner run only
-
-Unexpected. Worth understanding before trusting either number.
-
-- **K012** Day-trip and French Creek maximum combined volume is 120 people.
-  - found by: p04-ceiling-customers-per-work
 
 ## Candidates present in one run only
 

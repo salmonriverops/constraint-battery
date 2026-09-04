@@ -17,9 +17,9 @@ Key sha256: `8ab6bedde066c997377f0c023efc0ff241c0a613bba90d5d5ca3269c5b32f2a3`
 
 | Measure | Value | Of |
 | --- | --- | --- |
-| Recall | 8% | 5 of 63 operating constraints |
+| Recall | 10% | 6 of 63 operating constraints |
 | Precision | 79% | 23 of 29 candidates |
-| Novelty | 19 | real constraints the key did not contain |
+| Novelty | 18 | real constraints the key did not contain |
 | False | 6 | candidates that were not constraints |
 
 2 candidate(s) recovered more than one key row. Each is counted once in precision and credits every key row it named:
@@ -27,16 +27,16 @@ Key sha256: `8ab6bedde066c997377f0c023efc0ff241c0a613bba90d5d5ca3269c5b32f2a3`
 - p08-override-work-ovr-208d44cad2d2 covers K043, K069
 - p08-override-work-ovr-384927112582 covers K063, K014
 
-Novelty is the number that matters. 19 constraint(s) here are real and a two year manual effort did not write them down.
+Novelty is the number that matters. 18 constraint(s) here are real and a two year manual effort did not write them down.
 
-The key also holds 11 row(s) marked `scope=interface`: warning thresholds, how far out a flag appears, defaults used when a field is blank. Those describe the dispatch tooling rather than the operation, and they sit outside the headline denominator by a decision made before the first run. The battery recovered 1 of them. Counting them in, recall over all 74 key rows is 8%.
+The key also holds 11 row(s) marked `scope=interface`: warning thresholds, how far out a flag appears, defaults used when a field is blank. Those describe the dispatch tooling rather than the operation, and they sit outside the headline denominator by a decision made before the first run. The battery recovered 1 of them. Counting them in, recall over all 74 key rows is 9%.
 
 ## Recall by constraint type
 
 | Type | Recovered | Of | Recall |
 | --- | --- | --- | --- |
 | availability | 0 | 3 | 0% |
-| capacity | 0 | 18 | 0% |
+| capacity | 1 | 18 | 6% |
 | compliance | 0 | 3 | 0% |
 | driver | 0 | 3 | 0% |
 | eligibility | 2 | 6 | 33% |
@@ -56,12 +56,12 @@ The key also holds 11 row(s) marked `scope=interface`: warning thresholds, how f
 | --- | --- | --- | --- |
 | airtable | 0 | 6 | 0% |
 | code | 4 | 29 | 14% |
-| head | 2 | 35 | 6% |
+| head | 3 | 35 | 9% |
 | rafting checklists.xlsx | 0 | 4 | 0% |
 
 ### Remembered against written down
 
-- Rules recalled unaided: 2 of 35 recovered, 6%
+- Rules recalled unaided: 3 of 35 recovered, 9%
 - Rules found in a document: 4 of 39 recovered, 10%
 
 ## New constraints found
@@ -74,8 +74,6 @@ The key also holds 11 row(s) marked `scope=interface`: warning thresholds, how f
   - trailers can serve multiple trips on the same day, if they are close and falls within hourly timeframes taht work. rigs can drop off full day at spring bar in the morning then be back to pickup the morning haalf day at lucile around noon. then it can pickup the full day and afternoon half day at lucile.
 - **p03-exclusivity-van** (exclusivity) A Van is sometimes booked on two jobs whose times overlap. This happened 337 times across 6 of them. Is the overlap allowed, or are these mistakes?
   - > trailers can serve multiple trips on the same day, if they are close and falls within hourly timeframes taht work. rigs can drop off full day at spring bar in the morning then be back to pickup the morning alf day at lucile around noon. then it can pickup the full day and afternoon half day at lucile. here i mean vans instread of trailers
-- **p04-ceiling-customers-per-work** (capacity) The number of guests on one job tops out at 127, but only 1 times out of 433, and the numbers just below it thin out gradually. Is 127 a limit, or just the busiest it ever got?
-  - similar to rule k012 but we can likely push srhab to 140 and day trips have run at the same time. gets tight be we can make it work
 - **p08-override-work-ovr-0a9e36c5ef2f** (any) Somebody went back and changed ovr_0a9e36c5ef2f on 4 work records, 4 times in all, after it had already been set. Typically 3 day(s) before the job, and 0 of them on the day or after. What is the system getting wrong that keeps needing this?
   - FINDING: the override log records the acknowledgement but not what provoked it. The key names the vehicle, not the condition. Three different situations produce an identical record, so the log cannot explain itself without opening Airtable revision history. Fixable by storing the rule id alongside the acknowledgement. this is probably about bus driver confirmed, but can't confimr. bus drivers are part timers and need to manually confirmed by text to make sure they can drive. or we were short on seats and a bus had to be added which would result in a matched rule
 - **p08-override-work-ovr-0cd7af36191f** (any) Somebody went back and changed ovr_0cd7af36191f on 23 work records, 23 times in all, after it had already been set. Typically 3 day(s) before the job, and 6 of them on the day or after. What is the system getting wrong that keeps needing this?
@@ -120,7 +118,6 @@ This list is the interview.
 - **K009** (timing) Maximum two half-day trips per day (10 am and 2 pm).
 - **K010** (timing) Main Salmon has assigned launch dates.
 - **K011** (timing) Lower Salmon preferred launch days are Monday and Tuesday; other days permitted when needed.
-- **K012** (capacity) Day-trip and French Creek maximum combined volume is 120 people.
 - **K013** (capacity) One seat and one PFD required per guest.
 - **K015** (capacity) Day-trip paddle boats limited to 9 guests on a 16-ft boat.
 - **K016** (capacity) French Creek / SRHAB paddle boats limited to 10 guests on a 16-ft boat.
