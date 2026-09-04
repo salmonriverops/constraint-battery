@@ -14,6 +14,7 @@ import argparse
 import csv
 import json
 import os
+import re
 import textwrap
 import sys
 from datetime import date, datetime
@@ -217,7 +218,7 @@ def _resolver(db_path):
             labels[rid] = f"{name} ({kind})" if kind else str(name)
         for wid, wtype, start in con.execute(
                 "SELECT work_id, work_type, start_ts FROM work").fetchall():
-            day = start.strftime("%Y-%m-%d %H:%M") if start else "no start time"
+            day = start.strftime("%a %Y-%m-%d %H:%M") if start else "no start time"
             labels[wid] = f"{wtype or 'untyped'} on {day}"
         for lid, name in con.execute(
                 "SELECT location_id, name FROM locations").fetchall():
@@ -238,12 +239,31 @@ def _airtable_url(landing_id, base):
     return f"https://airtable.com/{base}/{table_id}/{record}"
 
 
+_TIMESTAMP = re.compile(r"^(\d{4})-(\d{2})-(\d{2})([ T]\d{2}:\d{2}(:\d{2})?)?$")
+
+
+def _with_weekday(text):
+    """Prefix a bare timestamp with its day name.
+
+    Which day of the week a job falls on is often the whole point of a candidate, and
+    2026-06-23 does not say Tuesday to anyone.
+    """
+    match = _TIMESTAMP.match(text)
+    if not match:
+        return text
+    try:
+        day = date(int(match.group(1)), int(match.group(2)), int(match.group(3)))
+    except ValueError:
+        return text
+    return f"{day.strftime('%a')} {text}"
+
+
 def _describe(value, labels, base):
     """Render one evidence value with its human label and link when there is one."""
     text = str(value)
     label = labels.get(text)
     if label is None:
-        return text
+        return _with_weekday(text)
     url = _airtable_url(text, base)
     return f"{label}" + (f"  {url}" if url else f"  [{text}]")
 
@@ -431,8 +451,19 @@ def cmd_judge(args):
               f"Use --redo to go through them again.")
         return 0
 
-    print(f"{len(queue)} candidate(s) to judge. Ctrl-C or q at any prompt stops and "
-          f"keeps what you have done.\n")
+    print(f"{len(queue)} candidate(s) to judge.\n")
+    print("  m  MATCH   this says the same thing as a rule already in your key.")
+    print("             You will be asked which key id, or ids if it covers several.")
+    print("  n  NEW     this is a real constraint and your key does not contain it.")
+    print("             These are the finds. This is the number the experiment is about.")
+    print("  f  FALSE   this is not a constraint. A data artifact, a coincidence, or")
+    print("             a pattern with no rule behind it.")
+    print("  s  SKIP    come back to it. Nothing is recorded and it stays in the queue.")
+    print("  q  QUIT    stop. Everything already judged is saved.")
+    print()
+    print("  If you cannot decide between MATCH and NEW, it is NEW only when you are")
+    print("  sure no key row says it. Otherwise skip it and look the key row up first.")
+    print()
 
     for position, candidate in enumerate(queue, 1):
         cid = candidate["candidate_id"]
@@ -498,8 +529,8 @@ def main(argv=None):
     p_show.add_argument("--base", default=os.environ.get("AIRTABLE_BASE", ""),
                         help="Airtable base id, to print a link to each record. "
                              "Defaults to $AIRTABLE_BASE.")
-    p_show.add_argument("--examples", type=int, default=3,
-                        help="example rows to print per candidate, default 3")
+    p_show.add_argument("--examples", type=int, default=6,
+                        help="example rows to print per candidate, default 6")
     p_show.add_argument("--todo", action="store_true",
                         help="only the candidates with no verdict yet in match.csv")
     p_show.set_defaults(func=cmd_show)
@@ -508,7 +539,7 @@ def main(argv=None):
     p_judge.add_argument("run_dir")
     p_judge.add_argument("--db", default=str(DEFAULT_DB))
     p_judge.add_argument("--base", default=os.environ.get("AIRTABLE_BASE", ""))
-    p_judge.add_argument("--examples", type=int, default=3)
+    p_judge.add_argument("--examples", type=int, default=6)
     p_judge.add_argument("--redo", action="store_true",
                          help="go through candidates that already have a verdict")
     p_judge.set_defaults(func=cmd_judge)
