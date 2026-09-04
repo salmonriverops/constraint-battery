@@ -1,30 +1,32 @@
 candidate_id,key_id,verdict,note
-p03-exclusivity-bus,,,
-p03-exclusivity-person,,,
-p03-exclusivity-trailer,,,
-p03-exclusivity-van,,,
-p04-ceiling-customers-per-work,,,
-p04-ceiling-resources-per-work,,,
-p04-ceiling-work-per-day,,,
-p04-ceiling-work-per-location-per-day,,,
-p04-ceiling-work-per-resource-per-day,,,
-p05-population-work-type-by-status,,,
-p05-exemption-work-type-by-status-planned,,,
-p08-override-work-ovr-0a9e36c5ef2f,,,
-p08-override-work-ovr-0cd7af36191f,,,
-p08-override-work-ovr-1b495b2aa25b,,,
-p08-override-work-ovr-208d44cad2d2,,,
-p08-override-work-ovr-264e4cce27ff,,,
-p08-override-work-ovr-384927112582,,,
-p08-override-work-ovr-4d682831618d,,,
-p08-override-work-ovr-6bd33d092af5,,,
-p08-override-work-ovr-6c27f1502e50,,,
-p08-override-work-ovr-6f14edf07cf2,,,
-p08-override-work-ovr-7b8042acacfd,,,
-p08-override-work-ovr-9e3bdb99b27b,,,
-p08-override-work-ovr-b41bb92b8955,,,
-p08-override-work-ovr-bf5efa29e136,,,
-p08-override-work-ovr-e4b5f5e2c2d1,,,
-p08-override-work-ovr-e87673c6f82a,,,
-p08-override-work-ovr-f3ebe5d06d50,,,
-p08-override-work-ovr-fc4e6af39b2a,,,
+p03-exclusivity-bus,,NEW,buses can serve muutlipe trips if the timing and seat capacities line up. multiple trips getting off at the same time can share a bus but only if at the same location and time. and same destination bus can also drop off full day at 9am be back to pickup at srhab at lucile at 1230 then be ready to pickup the full day at 3 at lucile
+p03-exclusivity-person,,NEW,"guides can also drive at certain times, not when they are on the water guiding. > Guides assigned to a trip also run that trip's shuttles.   <- talk, Enter > Only at defined drop and pickup points, at set times.      <- talk, Enter > Not a double booking and does not need extra staff."
+p03-exclusivity-trailer,,NEW,"trailers can serve multiple trips on the same day, if they are close and falls within hourly timeframes taht work. rigs can drop off full day at spring bar in the morning then be back to pickup the morning haalf day at lucile around noon. then it can pickup the full day and afternoon half day at lucile."
+p03-exclusivity-van,,NEW,"> trailers can serve multiple trips on the same day, if they are close and falls within hourly timeframes taht work. rigs can drop off full day at spring bar in the morning then be back to pickup the morning alf day at lucile around noon. then it can pickup the full day and afternoon half day at lucile. here i mean vans instread of trailers"
+p04-ceiling-customers-per-work,,NEW,similar to rule k012 but we can likely push srhab to 140 and day trips have run at the same time. gets tight be we can make it work
+p04-ceiling-resources-per-work,,FALSE,we don't know the limit as capacity is very dynamic
+p04-ceiling-work-per-day,,FALSE,
+p04-ceiling-work-per-location-per-day,,FALSE,
+p04-ceiling-work-per-resource-per-day,,FALSE,"vans can serve multiple drop off and pick ups in the same day, depending on the order of the locatiosn along the river and the distances"
+p05-population-work-type-by-status,,FALSE,no this is a result of how the data is recorded not a constraint to operations
+p05-exemption-work-type-by-status-planned,,FALSE,just a result of data. not a constraint to operations.
+p08-override-work-ovr-0a9e36c5ef2f,,NEW,"FINDING: the override log records the acknowledgement but not what provoked it. The key names the vehicle, not the condition. Three different situations produce an identical record, so the log cannot explain itself without opening Airtable revision history. Fixable by storing the rule id alongside the acknowledgement. this is probably about bus driver confirmed, but can't confimr. bus drivers are part timers and need to manually confirmed by text to make sure they can drive. or we were short on seats and a bus had to be added which would result in a matched rule"
+p08-override-work-ovr-0cd7af36191f,,NEW,finding - bus drivers must be confirmed manually via text. they don't use our dashboard or slack. this helps us remember to verify that they can work
+p08-override-work-ovr-1b495b2aa25b,,NEW,"multipel rules here. finding - each guide must have a guide license, CP each guide must have a current cpr and first aid cert a part time guide was verified as licensed but the record was never updated so we kept overriding the conflict"
+p08-override-work-ovr-208d44cad2d2,K043,MATCH,
+p08-override-work-ovr-208d44cad2d2,K069,MATCH,
+p08-override-work-ovr-264e4cce27ff,K044,MATCH,
+p08-override-work-ovr-384927112582,K063,MATCH,
+p08-override-work-ovr-384927112582,K014,MATCH,
+p08-override-work-ovr-4d682831618d,,NEW,"guests counts which equal seat counts don't mattter on day 1 of srhab. mon or thursday. the conflict keeps showing saying all the guests need a ride buty they self shuttle on these days. for the middle fork scout truck one. the scouts handle the bus shuttle. we have nothing to do with it. the scout truck only needs to hold the 5 guides, never guests. finding"
+p08-override-work-ovr-6bd33d092af5,K017,MATCH,"> flag was correct, guides were genuinely missing at the time. Acknowledged, then > guides were added and the trip planned properly. > FINDING: acknowledgement is being used as snooze, not exemption. Same field > covers ""rule does not apply"" and ""not done yet"". Cannot separate them."
+p08-override-work-ovr-6c27f1502e50,,NEW,"sometimes we run trips with different guides to guest ratios. some trips will reccoemdn 5 guides but we can do it with 4 if a group would rather ride together on one boat. Others will reccomend 3 when it can be done with 2 guides if more people are interested in rowing their own boats or kayaking, not needing more raft seats."
+p08-override-work-ovr-6f14edf07cf2,,NEW,"we prefer to keep trailers tied to teh same trips, mostly when the gear/baots are not on the trips so it can be stored and we don't have to do extra work to remove the gear, use the trailer, then relaod teh gear. whiel the trip is out on the water, the trailer sits idle and empty and can be easily use for other uses - finding"
+p08-override-work-ovr-7b8042acacfd,,NEW,finding - the owner is the only person with an outfitting license. he does not need a guide licesne when he has an outfitting license
+p08-override-work-ovr-9e3bdb99b27b,,NEW,fidnign - we have to remember to cooridinate the shuttle for the guests on the lower salmon. someetimes this is self shuttle for a lower trip cost or we set up a movement to pick them up after the trip. rule depends on groups size. we can fit about 10 people and dry bags in a 15 passenger van. 11 to 14 and we birng a trailer. more than that and we have to send 2 vans and drivers to bring the people from pittsburg landign to hammer creek
+p08-override-work-ovr-b41bb92b8955,,NEW,finding gudies must have curent guide license. a guide was licensed and had shown the certificate, but it was never uploaded into the system
+p08-override-work-ovr-bf5efa29e136,,NEW,lower salmon and 4 day main salmon trips have jetboat pickups finding - this must be manually confirmed and cooridinated with teh jetbaot company based on where the group is camping the last night of the trip. its easier to just check the override and wait for thier text to come in. then i forward to the jetbaot company
+p08-override-work-ovr-e4b5f5e2c2d1,,NEW,"m middle fork shuttle must be cooridated with our main salmon launch. if the dates align the main salmon guides can drive the middle fork rig to the takeout, as the pickup and dropoff is on the way to the main  salmon. if the dates do not align, as in there is the middle fork trips gets off before the main salmon crew can move their truck, we have set up a custom movemnt to have someone driver over and shuttle it or have a hsuttle comapny do it. finding"
+p08-override-work-ovr-e87673c6f82a,,NEW,bus drivers don't use slack or our dispatch schedule board link so we text them manually with each update and confirm if they can drive the route
+p08-override-work-ovr-f3ebe5d06d50,,NEW,when a guide is assigned to lead a trip but not lead guide certified. guides must be lead capable
+p08-override-work-ovr-fc4e6af39b2a,,NEW,on main salmon and lower salmon - reminder that we must confirm that guests have their shuttle cooridinated.

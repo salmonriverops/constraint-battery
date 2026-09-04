@@ -1,9 +1,9 @@
 candidate_id,key_id,verdict,note
-p03-exclusivity-person,,,
-p03-exclusivity-vehicle,,,
-p03-turnaround-person,,,
-p03-turnaround-vehicle,,,
-p04-ceiling-customers-per-work,,,
-p04-ceiling-resources-per-work,,,
-p04-ceiling-work-per-day,,,
-p04-ceiling-work-per-resource-per-day,,,
+p03-exclusivity-person,,NEW,"Guides may also drive on the same day when their guide assignment and driver movement times do not overlap, and required turnaround buffers are met."
+p03-exclusivity-vehicle,,NEW,vehicles can be used for multiple jobs if the times align or they can make multiple stops at sites along the route
+p03-turnaround-person,,NEW,hagerman has tighter turnaround times. the 10am and 2pm lauch times work - finding a guide was removed from the rafting bootcamp that day. another guide took his spot. currenlty dont have a great way for data to represent a guide swapping off a trip early and putting someone esle on
+p03-turnaround-vehicle,,FALSE,
+p04-ceiling-customers-per-work,K012,MATCH,"127 is observed, not a cap. The real rule is not total customers per day/job; French/SRHAB itself is around 120, and other day trips may run simultaneously, pushing total day volume toward 140."
+p04-ceiling-resources-per-work,,FALSE,just observed
+p04-ceiling-work-per-day,,FALSE,just the busiest
+p04-ceiling-work-per-resource-per-day,,FALSE,just teh busiest
