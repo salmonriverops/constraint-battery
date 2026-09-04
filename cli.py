@@ -16,6 +16,7 @@ import json
 import os
 import re
 import textwrap
+from collections import Counter
 import sys
 from datetime import date, datetime
 from pathlib import Path
@@ -758,14 +759,26 @@ def cmd_override(args):
             print(f"    {kind:<16}{a:>9.0%}{b:>14.0%}{flag}")
         print()
 
+    # Which source table the jobs came from. work pools Daily Ops and Movements,
+    # and an override that only ever touches one of them is a different animal from
+    # one that touches both.
+    sources = Counter("Daily Ops" if str(e).startswith("op_") else
+                      "Movements" if str(e).startswith("mv_") else "other"
+                      for _, _, e, _, _, _, _, _ in rows)
+    print("jobs by source table: "
+          + ", ".join(f"{n} {name}" for name, n in sources.most_common()))
+    print()
+
     print(f"{len(rows)} change(s)\n")
     for at, by, entity, wtype, start, guests, old, new in rows:
+        where = ("Daily Ops" if str(entity).startswith("op_") else
+                 "Movements" if str(entity).startswith("mv_") else "?")
         when = at.strftime("%a %Y-%m-%d") if at else "no timestamp"
         job = start.strftime("%a %Y-%m-%d %H:%M") if start else "no start time"
         lead = (start.date() - at.date()).days if (at and start) else None
         print(f"  changed {when} by {by or 'unknown'}"
               + (f", {lead} day(s) before the job" if lead is not None else ""))
-        print(f"    job: {wtype} on {job}"
+        print(f"    job: [{where}] {wtype} on {job}"
               + (f", {guests} guests" if guests is not None else ""))
         url = _airtable_url(entity, args.base)
         if url:
