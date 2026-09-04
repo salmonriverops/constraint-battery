@@ -48,6 +48,13 @@ def load(export_dir, db_path, source="airtable", reveal_labels=False, profile="f
         raise SystemExit(f"Export directory not found: {export_dir}")
 
     files = [p for p in export_dir.iterdir() if p.is_file()]
+    if not files:
+        raise SystemExit(
+            f"Export directory {export_dir} is empty. Nothing was loaded.\n"
+            "The export step did not produce files. Re-run tools/export_airtable.py and "
+            "read its output before loading. A silent load of an empty directory writes "
+            "six empty tables and every probe then finds nothing, which looks like a "
+            "result and is not one.")
     check_export_dir(files)
 
     adapter_module = ADAPTERS.get(source)
@@ -68,6 +75,17 @@ def load(export_dir, db_path, source="airtable", reveal_labels=False, profile="f
         for row in tables.get(table, []):
             for column in columns:
                 row[column] = None
+
+    # An export with no work and no resources cannot produce a meaningful run under any
+    # profile. The lean profile empties location_travel and changes deliberately, so
+    # those are not evidence of a broken export. These two are.
+    if not tables.get("work") and not tables.get("resources"):
+        raise SystemExit(
+            f"Export {export_dir} carried no work rows and no resources. Nothing was "
+            "loaded and the database was left alone.\n"
+            "Check the export output for HTTP errors. A 401 means the token is wrong, "
+            "which is the common case when a placeholder was pasted instead of the "
+            "real value.")
 
     db_path = Path(db_path)
     if db_path.exists():
