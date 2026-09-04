@@ -643,6 +643,76 @@ def cmd_day(args):
     return 0
 
 
+def cmd_gaps(args):
+    """The tightest turnarounds for a kind of resource, named.
+
+    p03 reports that a floor was broken N times and gives a histogram. This names
+    the pairs: who, which job ended, which one started, and how many minutes sat
+    between them. The gap definition mirrors p03 exactly, including its minimum
+    assignment guard, so the counts here and there agree.
+    """
+    import duckdb
+
+    con = duckdb.connect(str(args.db), read_only=True)
+    try:
+        rows = con.execute("""
+            WITH eligible AS (
+              SELECT resource_id FROM assignments
+              WHERE start_ts IS NOT NULL AND end_ts IS NOT NULL
+              GROUP BY 1 HAVING count(*) >= ?
+            ),
+            ordered AS (
+              SELECT r.kind, a.resource_id, coalesce(r.name, a.resource_id) AS rname,
+                     a.work_id, a.role, a.start_ts, a.end_ts,
+                     lead(a.start_ts) OVER w AS next_start,
+                     lead(a.work_id)  OVER w AS next_work,
+                     lead(a.role)     OVER w AS next_role
+              FROM assignments a
+              JOIN resources r ON r.resource_id = a.resource_id
+              JOIN eligible e ON e.resource_id = a.resource_id
+              WHERE a.start_ts IS NOT NULL AND a.end_ts IS NOT NULL
+              WINDOW w AS (PARTITION BY a.resource_id ORDER BY a.start_ts, a.assignment_id)
+            )
+            SELECT o.rname, o.kind, o.end_ts, o.next_start,
+                   date_diff('minute', o.end_ts, o.next_start) AS gap,
+                   coalesce(wa.work_type, 'untyped'), o.work_id, o.role,
+                   coalesce(wb.work_type, 'untyped'), o.next_work, o.next_role
+            FROM ordered o
+            LEFT JOIN work wa ON wa.work_id = o.work_id
+            LEFT JOIN work wb ON wb.work_id = o.next_work
+            WHERE o.next_start IS NOT NULL
+              AND date_diff('minute', o.end_ts, o.next_start) >= 0
+              AND date_diff('minute', o.end_ts, o.next_start) < ?
+              AND (? = '' OR lower(o.kind) = lower(?))
+            ORDER BY gap, o.rname""",
+            [args.min_assignments, args.under, args.kind, args.kind]).fetchall()
+    finally:
+        con.close()
+
+    if not rows:
+        print(f"no gaps under {args.under} minutes"
+              + (f" for kind {args.kind!r}" if args.kind else ""))
+        return 0
+
+    print(f"{len(rows)} gap(s) under {args.under} minutes"
+          + (f" for kind {args.kind!r}" if args.kind else "") + "\n")
+    for (name, kind, end, nxt, gap, wtype_a, wid_a, role_a,
+         wtype_b, wid_b, role_b) in rows:
+        print(f"  {gap:>4} min   {name} [{kind}]")
+        print(f"            finished {wtype_a} at "
+              f"{end.strftime('%a %Y-%m-%d %H:%M')} as {role_a}")
+        url = _airtable_url(wid_a, args.base)
+        if url:
+            print(f"              {url}")
+        print(f"            started  {wtype_b} at "
+              f"{nxt.strftime('%a %Y-%m-%d %H:%M')} as {role_b}")
+        url = _airtable_url(wid_b, args.base)
+        if url:
+            print(f"              {url}")
+        print()
+    return 0
+
+
 def cmd_overrides(args):
     """Every override label in the log, with how much sits behind each.
 
@@ -891,6 +961,16 @@ def main(argv=None):
     p_judge.add_argument("--redo", action="store_true",
                          help="go through candidates that already have a verdict")
     p_judge.set_defaults(func=cmd_judge)
+
+    p_gaps = sub.add_parser("gaps", help="name the tightest turnarounds behind a p03 floor")
+    p_gaps.add_argument("kind", nargs="?", default="",
+                        help="resource kind, for example person or Van. Omit for all.")
+    p_gaps.add_argument("--under", type=int, default=30, help="minutes, default 30")
+    p_gaps.add_argument("--db", default=str(DEFAULT_DB))
+    p_gaps.add_argument("--base", default=os.environ.get("AIRTABLE_BASE", ""))
+    p_gaps.add_argument("--min-assignments", type=int, default=20,
+                        help="must match the run's guard, default 20")
+    p_gaps.set_defaults(func=cmd_gaps)
 
     p_ovrs = sub.add_parser("overrides", help="list every override label with its weight")
     p_ovrs.add_argument("--db", default=str(DEFAULT_DB))
