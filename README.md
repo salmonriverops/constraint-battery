@@ -87,6 +87,13 @@ resource needs at least 20 assignments, a work_type at least 10 instances, a fie
 least 50 populated rows. Every candidate carries the volumes it passed, under
 `confidence_inputs`, so you can see what it is standing on.
 
+## Handing this to someone else
+
+`BRIEFING.md` explains the project to a fresh session, for review or code work.
+`key/ASSEMBLE_PROMPT.md` is a separate prompt for getting help writing the answer key,
+deliberately withholding what the probes look for. Use that one in a session that has
+not read the briefing, for the reason it explains.
+
 ## Scoring, in three steps and in this order
 
 1. **Freeze the key.** Assemble `key/answer_key.csv` from the constraint inventory,
