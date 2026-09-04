@@ -42,7 +42,7 @@ K040,availability,A guide with an approved Blackout request or Assignment block 
 K041,role,Store Staff cannot also hold a guide driver or food role on the same day.,code,
 K042,role,A guide assigned to a multi-day trip cannot take any other overlapping assignment for the duration of that trip.,code,
 K043,vehicle,The same vehicle or trailer cannot be assigned to two same-launch-day operations unless cleared by stacking shuttle-pool or rig-group rules.,code,
-K044,jetboat,A jetboat trip type (Lower Salmon 4-Day or Main Salmon 4-Day) on a today-or-future date must have Jetboat confirmed checked.,code,
+K044,jetboat,A jetboat trip type (Lower Salmon 4-Day or Main Salmon 4-Day) on a today-or-future date must have Jetboat confirmed checked.,code,scope=interface
 K045,capacity,Main Salmon and Middle Fork trips are hard-capped at 25 guests and 5 guides.,code,
 K046,vehicle,A trip that has boats to haul (Total boats > 0) must have a trailer assigned when a van/driver is present.,code,
 K047,vehicle,Boats on a trip may not exceed the assigned trailer’s Boat capacity (standard = 5 mega = 10).,code,
@@ -53,25 +53,23 @@ K051,availability,A guide assigned to a trip whose date falls before their Seaso
 K052,driver,A driver whose Drivers License Expiration has passed or whose CDL/DOT medical has expired cannot be assigned.,code,
 K053,vehicle,A vehicle on manual hold or with an open critical issue cannot be assigned to a trip.,code,
 K054,availability,Movement drivers are subject to the same time-off blackout and season rules as Daily Op crew.,code,
-K055,shuttle,A Middle Fork trip with no Shuttle details is invalid.,code,
-K056,shuttle,A Main Salmon Lower Salmon or Overnighter trip with Guest shuttle coordinated unchecked is invalid when inside the hard window.,code,
+K055,shuttle,A Middle Fork trip with no Shuttle details is invalid.,code,scope=interface
+K056,shuttle,A Main Salmon Lower Salmon or Overnighter trip with Guest shuttle coordinated unchecked is invalid when inside the hard window.,code,scope=interface
 K057,capacity,For Full Day Half Day Overnighter or SRHAB day-3 operations 1–11 people require 1 van.,airtable,
 K058,capacity,For Full Day Half Day Overnighter or SRHAB day-3 operations 12–23 people require 2 vans.,airtable,
 K059,capacity,For Full Day Half Day Overnighter or SRHAB day-3 operations 24–25 people require 3 vans.,airtable,
 K060,capacity,For Full Day Half Day Overnighter or SRHAB day-3 operations 26–36 people require 3 vans or 1 bus.,airtable,
 K061,capacity,For Full Day Half Day Overnighter or SRHAB day-3 operations 37 or more people require a bus.,airtable,
 K062,capacity,Standard day-trip 16-ft boats are limited to 9 guests; SRHAB / French Creek 16-ft boats are limited to 10 guests.,airtable,
-K063,lead,Designated lead for a multi-day section must be one of the 2026 named leads for that section (Abigail Brown for Middle Fork Connor P or Ammon for Lower Hannah or Eric Newell for Main Logan for French/SRHAB).,code,
-K064,capacity,Soft capacity warning fires when boats exceed the comfortable load of 4 on a standard trailer or 8 on a Mega trailer.,code,
+K063,lead,Designated lead for a multi-day section must be one of a small fixed set of named leads for that section in the 2026 season (one named lead for Middle Fork two for Lower one for Main one for French/SRHAB).,code,names redacted; cardinality preserved
+K064,capacity,Soft capacity warning fires when boats exceed the comfortable load of 4 on a standard trailer or 8 on a Mega trailer.,code,scope=interface
 K065,driver,A driver on big drives three consecutive days triggers a soft fatigue flag on the third day.,code,
 K066,timing,A guide or driver finishing a movement needs at least 180 minutes before starting a day-trip assignment; shorter gaps are a soft tight-turnaround flag.,code,
-K067,capacity,When a Vehicle record has no Passenger seats value the default seat count used for capacity checks is 15.,code,
-K068,vehicle,A pickup movement with 25 or more riders and no bus assigned triggers a soft “bus likely needed” flag.,code,
+K067,capacity,When a Vehicle record has no Passenger seats value the default seat count used for capacity checks is 15.,code,scope=interface
+K068,vehicle,A pickup movement with 25 or more riders and no bus assigned triggers a soft “bus likely needed” flag.,code,scope=interface
 K069,vehicle,Two jobs on the same rig are clear if the gap between their time windows is at least 60 minutes; a smaller gap with no overlap is a soft tight-turnaround flag; real overlap is hard.,code,
-K070,vehicle,A movement carrying people with no vehicle assigned is hard within 1 day of the trip soft within 3 days and silent further out.,code,
-K071,vehicle,“Bus driver not confirmed” only flags within 4 days of the trip.,code,
-K072,shuttle,Guest-shuttle-not-coordinated with no details is hard within 2 days of the trip and soft further out.,code,
-K073,timing,A Riggins day-trip operation with zero guests is treated as not running; its movements do not commit rigs or crew.,code,
-K074,capacity,Middle Fork trips are exempt from the per-movement passenger-seat capacity check.,code,
-K075,driver,A CDL-required vehicle must be driven by a CDL-qualified driver.,code,
-K076,role,Store Staff cannot also hold a guide driver or food role on the same day.,code,
+K070,vehicle,A movement carrying people with no vehicle assigned is hard within 1 day of the trip soft within 3 days and silent further out.,code,scope=interface
+K071,vehicle,“Bus driver not confirmed” only flags within 4 days of the trip.,code,scope=interface
+K072,shuttle,Guest-shuttle-not-coordinated with no details is hard within 2 days of the trip and soft further out.,code,scope=interface
+K073,timing,A Riggins day-trip operation with zero guests is treated as not running; its movements do not commit rigs or crew.,code,scope=interface
+K074,capacity,Middle Fork trips are exempt from the per-movement passenger-seat capacity check.,code,scope=interface

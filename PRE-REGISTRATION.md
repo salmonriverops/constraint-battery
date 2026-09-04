@@ -86,3 +86,37 @@ plumbing and CLI wiring are unaffected.
 
 The answer key was assembled in a separate model with no access to this
 repository or this session, so the key itself is untouched.
+
+---
+
+## What counts, decided 2026-09-04 before any run
+
+The key holds 74 rows. Thirty-one came from the conflict checker and the
+dispatch board. Eleven of those describe how the dispatch tooling behaves
+rather than how the operation is constrained, and they sit outside the
+headline recall denominator. The headline number is therefore recall over 63
+operating constraints. All 74 are still scored and `score.md` reports both.
+
+A row is `scope=interface` when its subject is the software: a warning
+threshold, how far ahead of a trip a flag appears, a default used when a
+field is blank, a required checkbox, or an exemption from a check. The eleven
+are K044, K055, K056, K064, K067, K068, K070, K071, K072, K073 and K074.
+
+Two judgment calls inside that rule, stated so they can be argued with. K066
+and K069 both name a minimum gap between jobs and both are enforced as soft
+flags. They stayed in the headline denominator because the statement's
+subject is the operation and the flag is only how it is surfaced. Someone
+could reasonably put them the other way. K073 went out because treating a
+zero-guest operation as not running is a reading of a record, not a limit on
+the business.
+
+The rule was applied by the session that built the battery, which had by then
+been exposed to the denylisted source files. See the exposure note above.
+That is the weakest link in this decision, and it is why the split is written
+down here with the row ids named, before a number exists, rather than settled
+after one.
+
+`answer_key.csv` was frozen at hash `2e8541eb` on 2026-09-04 at 04:07 UTC and
+re-frozen at `8ab6bedd` the same day after the duplicate merge, the name
+redaction and this scope decision. No run had been executed against real data
+at either point. From `8ab6bedd` the key is read-only.

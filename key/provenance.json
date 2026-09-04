@@ -33,7 +33,26 @@
     "conflict_check_v6.35.js",
     "dispatch board HTML (pasted-text.txt)"
   ],
-  "rows": 76,
+  "rows": 74,
   "notes": "Memory-only baseline marked source=head. Document-derived rows use the exact file name supplied. Airtable rule tables marked source=airtable. Hardcoded checker and board limits marked source=code. Soft/planned/note-only items from the conflict-checker tables were excluded. Some gear counts and vehicle-seat defaults remain qualitative where the operator supplied no hard numeric threshold beyond the values already recorded. The list prioritises completeness over tidiness; overlapping statements that apply to different trip types were kept separate.",
-  "recorded_by": "Committed verbatim as supplied by the operator on 2026-09-04. Two changes were made and neither touches content: a missing trailing field delimiter was added to the final row so every row parses as five fields, and the em dash in one source_documents entry was replaced with a hyphen. Exact duplicate statements at K041/K076 and K050/K075 were left in place rather than silently removed."
+  "recorded_by": "Committed as supplied by the operator on 2026-09-04, with four recorded changes and no rewording of any surviving statement. A missing trailing field delimiter was added to the final row. The em dash in one source_documents entry was replaced with a hyphen. Two rows that were exact duplicates of earlier rows were removed, taking the count from 76 to 74: the original K076 duplicated K041 and the original K075 duplicated K050. Five personal names in K063 were replaced with the count of leads per section, which preserves the constraint and removes the people. Ids were left contiguous at K001 to K074.",
+  "scope_split": {
+    "headline_denominator": 63,
+    "interface_rows": 11,
+    "interface_key_ids": [
+      "K044",
+      "K055",
+      "K056",
+      "K064",
+      "K067",
+      "K068",
+      "K070",
+      "K071",
+      "K072",
+      "K073",
+      "K074"
+    ],
+    "rule": "A row is scope=interface when its subject is the dispatch tooling rather than the operation: a warning threshold, how far ahead of a trip a flag appears, a default used when a field is blank, a required checkbox, or an exemption from a check. Those rows stay in the key and are scored, but outside the headline recall denominator.",
+    "decided_on": "2026-09-04, before any run against real data"
+  }
 }

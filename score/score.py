@@ -50,6 +50,19 @@ def load_key(key_dir: Path):
     return key_rows, digest, frozen, provenance
 
 
+def scope_of(row):
+    """Operating constraint, or a behaviour of the software that encodes it.
+
+    Rows marked scope=interface describe how the dispatch tooling behaves: a
+    warning threshold, how many days out a flag appears, a default used when a
+    field is blank. They are real, and they stay in the key, but they are not
+    properties of the operation and transaction records need not carry them.
+    They sit outside the headline recall denominator by a decision recorded in
+    PRE-REGISTRATION.md before the first run.
+    """
+    return "interface" if "scope=interface" in (row.get("notes") or "").lower() else "operating"
+
+
 def tally(run_dir: Path, key_rows):
     """Read one run's candidates and match.csv and count them up.
 
@@ -123,6 +136,14 @@ def tally(run_dir: Path, key_rows):
         if row["key_id"] in matched_keys:
             by_source[ksource][0] += 1
 
+    by_scope = defaultdict(lambda: [0, 0])
+    for row in key_rows:
+        bucket = by_scope[scope_of(row)]
+        bucket[1] += 1
+        if row["key_id"] in matched_keys:
+            bucket[0] += 1
+    headline_hit, headline_total = by_scope["operating"]
+
     by_probe = Counter(c["probe"] for c in candidates)
 
     return {
@@ -139,7 +160,11 @@ def tally(run_dir: Path, key_rows):
         "total_candidates": total_candidates,
         "scored": len(per_candidate),
         "unscored": total_candidates - len(per_candidate),
-        "recall": len(matched_keys) / len(key_rows),
+        "recall": headline_hit / headline_total if headline_total else 0.0,
+        "recall_hit": headline_hit,
+        "recall_total": headline_total,
+        "recall_all": len(matched_keys) / len(key_rows) if key_rows else 0.0,
+        "by_scope": by_scope,
         "precision": precision_num / total_candidates if total_candidates else 0.0,
         "precision_num": precision_num,
         "by_type": by_type,
@@ -247,7 +272,7 @@ def score_run(run_dir: Path, key_dir: Path):
     add("")
     add("| Measure | Value | Of |")
     add("| --- | --- | --- |")
-    add(f"| Recall | {t['recall']:.0%} | {len(t['matched_keys'])} of {len(key_rows)} key rows |")
+    add(f"| Recall | {t['recall']:.0%} | {t['recall_hit']} of {t['recall_total']} operating constraints |")
     add(f"| Precision | {t['precision']:.0%} | {t['precision_num']} of {t['total_candidates']} candidates |")
     add(f"| Novelty | {v['NEW']} | real constraints the key did not contain |")
     add(f"| False | {v['FALSE']} | candidates that were not constraints |")
@@ -262,6 +287,16 @@ def score_run(run_dir: Path, key_dir: Path):
     if v["NEW"]:
         add(f"Novelty is the number that matters. {v['NEW']} constraint(s) here are real "
             f"and a two year manual effort did not write them down.")
+        add("")
+
+    ihit, itotal = t["by_scope"].get("interface", [0, 0])
+    if itotal:
+        add(f"The key also holds {itotal} row(s) marked `scope=interface`: warning "
+            f"thresholds, how far out a flag appears, defaults used when a field is "
+            f"blank. Those describe the dispatch tooling rather than the operation, "
+            f"and they sit outside the headline denominator by a decision made before "
+            f"the first run. The battery recovered {ihit} of them. Counting them in, "
+            f"recall over all {len(key_rows)} key rows is {t['recall_all']:.0%}.")
         add("")
 
     lines.extend(recall_by(t["by_type"], "constraint type", "Type"))
